@@ -1,10 +1,10 @@
 //! Event representation - something that happened at a place and time.
 
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::core::{Location, Timestamp, SourceRef};
+use crate::core::{Location, SourceRef, Timestamp};
 use crate::error::{Error, Result};
 
 /// Unique identifier for an event.
@@ -327,11 +327,7 @@ mod tests {
 
     #[test]
     fn test_event_tags() {
-        let mut event = Event::new(
-            Location::new(0.0, 0.0),
-            Timestamp::now(),
-            "Test",
-        );
+        let mut event = Event::new(Location::new(0.0, 0.0), Timestamp::now(), "Test");
 
         event.add_tag("tag1");
         event.add_tag("tag2");

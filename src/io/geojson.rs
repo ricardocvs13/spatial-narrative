@@ -1,14 +1,13 @@
 //! GeoJSON format import/export.
 
-use std::io::{Read, Write};
+use super::format::Format;
+use crate::core::{
+    EventBuilder, Location, Narrative, NarrativeBuilder, SourceRef, SourceType, Timestamp,
+};
+use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use crate::core::{
-    Narrative, NarrativeBuilder, EventBuilder,
-    Location, Timestamp, SourceRef, SourceType,
-};
-use crate::{Result, Error};
-use super::format::Format;
+use std::io::{Read, Write};
 
 /// GeoJSON format handler.
 ///
@@ -56,16 +55,16 @@ pub struct GeoJsonFormat {
 pub struct GeoJsonOptions {
     /// Whether to include event IDs in exported GeoJSON
     pub include_ids: bool,
-    
+
     /// Whether to include tags in exported GeoJSON
     pub include_tags: bool,
-    
+
     /// Whether to include source references in exported GeoJSON
     pub include_sources: bool,
-    
+
     /// Property name for timestamp field
     pub timestamp_property: String,
-    
+
     /// Property name for text/description field
     pub text_property: String,
 }
@@ -126,15 +125,15 @@ struct Geometry {
 impl Format for GeoJsonFormat {
     fn import<R: Read>(&self, reader: R) -> Result<Narrative> {
         let fc: FeatureCollection = serde_json::from_reader(reader)?;
-        
+
         if fc.type_ != "FeatureCollection" {
             return Err(Error::InvalidFormat(
-                "expected GeoJSON FeatureCollection".to_string()
+                "expected GeoJSON FeatureCollection".to_string(),
             ));
         }
 
         let mut builder = NarrativeBuilder::new();
-        
+
         // Extract narrative-level metadata from FeatureCollection properties
         if let Some(props) = fc.properties {
             if let Some(title) = props.get("title").and_then(|v| v.as_str()) {
@@ -164,10 +163,12 @@ impl Format for GeoJsonFormat {
             }
 
             let props = &feature.properties;
-            
+
             // Extract timestamp
-            let timestamp = if let Some(ts_str) = props.get(&self.options.timestamp_property)
-                .and_then(|v| v.as_str()) {
+            let timestamp = if let Some(ts_str) = props
+                .get(&self.options.timestamp_property)
+                .and_then(|v| v.as_str())
+            {
                 Timestamp::parse(ts_str)
                     .map_err(|e| Error::InvalidFormat(format!("invalid timestamp: {}", e)))?
             } else {
@@ -175,13 +176,13 @@ impl Format for GeoJsonFormat {
             };
 
             // Build the event
-            let mut event_builder = EventBuilder::new()
-                .location(location)
-                .timestamp(timestamp);
+            let mut event_builder = EventBuilder::new().location(location).timestamp(timestamp);
 
             // Extract text/description
-            if let Some(text) = props.get(&self.options.text_property)
-                .and_then(|v| v.as_str()) {
+            if let Some(text) = props
+                .get(&self.options.text_property)
+                .and_then(|v| v.as_str())
+            {
                 event_builder = event_builder.text(text);
             }
 
@@ -196,7 +197,9 @@ impl Format for GeoJsonFormat {
 
             // Extract source
             if let Some(source_obj) = props.get("source").and_then(|v| v.as_object()) {
-                let source_type = source_obj.get("type").and_then(|v| v.as_str())
+                let source_type = source_obj
+                    .get("type")
+                    .and_then(|v| v.as_str())
                     .and_then(|s| match s.to_lowercase().as_str() {
                         "article" => Some(SourceType::Article),
                         "report" => Some(SourceType::Report),
@@ -255,7 +258,9 @@ impl Format for GeoJsonFormat {
 
             // Add tags if enabled and present
             if self.options.include_tags && !event.tags.is_empty() {
-                let tags: Vec<Value> = event.tags.iter()
+                let tags: Vec<Value> = event
+                    .tags
+                    .iter()
                     .map(|t| Value::String(t.clone()))
                     .collect();
                 properties.insert("tags".to_string(), Value::Array(tags));
@@ -263,11 +268,12 @@ impl Format for GeoJsonFormat {
 
             // Add source if enabled and present
             if self.options.include_sources && !event.sources.is_empty() {
-                let source = &event.sources[0];  // Use first source
+                let source = &event.sources[0]; // Use first source
                 let mut source_obj = Map::new();
-                source_obj.insert("type".to_string(), Value::String(
-                    source.source_type.to_string()
-                ));
+                source_obj.insert(
+                    "type".to_string(),
+                    Value::String(source.source_type.to_string()),
+                );
                 if let Some(url) = &source.url {
                     source_obj.insert("url".to_string(), Value::String(url.clone()));
                 }
@@ -339,7 +345,7 @@ mod tests {
 
         let format = GeoJsonFormat::new();
         let narrative = format.import_str(geojson).unwrap();
-        
+
         assert_eq!(narrative.events().len(), 1);
         let event = &narrative.events()[0];
         assert_eq!(event.location.lat, 40.7128);
@@ -389,7 +395,7 @@ mod tests {
 
         let format = GeoJsonFormat::new();
         let narrative = format.import_str(geojson).unwrap();
-        
+
         let event = &narrative.events()[0];
         assert_eq!(event.location.elevation, Some(100.5));
     }

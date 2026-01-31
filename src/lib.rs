@@ -47,14 +47,14 @@
 //! - [`parser`] - Extract locations from unstructured text
 //! - [`text`] - Natural language processing utilities
 
-pub mod core;
-pub mod index;
-pub mod graph;
 pub mod analysis;
+pub mod core;
+pub mod graph;
+pub mod index;
 pub mod io;
-pub mod transform;
 pub mod parser;
 pub mod text;
+pub mod transform;
 
 /// Error types for the library
 pub mod error;
@@ -62,13 +62,9 @@ pub mod error;
 /// Prelude module for convenient imports
 pub mod prelude {
     pub use crate::core::{
-        Event, EventBuilder, EventId,
-        Location, LocationBuilder,
-        Narrative, NarrativeBuilder, NarrativeId, NarrativeMetadata,
-        Timestamp, TemporalPrecision,
-        SourceRef, SourceType,
-        GeoBounds, TimeRange,
-        SpatialEntity, TemporalEntity,
+        Event, EventBuilder, EventId, GeoBounds, Location, LocationBuilder, Narrative,
+        NarrativeBuilder, NarrativeId, NarrativeMetadata, SourceRef, SourceType, SpatialEntity,
+        TemporalEntity, TemporalPrecision, TimeRange, Timestamp,
     };
     pub use crate::error::{Error, Result};
 }

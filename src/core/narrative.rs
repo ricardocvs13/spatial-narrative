@@ -1,7 +1,7 @@
 //! Narrative - a collection of related events forming a coherent story.
 
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::core::{Event, EventId, GeoBounds, TimeRange, Timestamp};
@@ -269,7 +269,12 @@ impl Narrative {
     where
         F: Fn(&Event) -> bool,
     {
-        let events = self.events.iter().filter(|e| predicate(e)).cloned().collect();
+        let events = self
+            .events
+            .iter()
+            .filter(|e| predicate(e))
+            .cloned()
+            .collect();
         Narrative {
             id: NarrativeId::new(),
             title: format!("{} (filtered)", self.title),

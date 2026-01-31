@@ -23,8 +23,8 @@
 //! assert!(!results.is_empty());
 //! ```
 
-use rstar::{RTree, RTreeObject, AABB, PointDistance};
-use crate::core::{Location, GeoBounds};
+use crate::core::{GeoBounds, Location};
+use rstar::{PointDistance, RTree, RTreeObject, AABB};
 
 /// A wrapper that makes Location compatible with R-tree indexing.
 #[derive(Debug, Clone)]
@@ -88,7 +88,7 @@ impl<T: Clone> SpatialIndex<T> {
             .enumerate()
             .map(|(i, item)| IndexedLocation::new(location_fn(item).clone(), i))
             .collect();
-        
+
         Self {
             tree: RTree::bulk_load(indexed),
             items,
@@ -99,7 +99,8 @@ impl<T: Clone> SpatialIndex<T> {
     pub fn insert(&mut self, item: T, location: &Location) {
         let index = self.items.len();
         self.items.push(item);
-        self.tree.insert(IndexedLocation::new(location.clone(), index));
+        self.tree
+            .insert(IndexedLocation::new(location.clone(), index));
     }
 
     /// Query items within a bounding box.
@@ -119,7 +120,12 @@ impl<T: Clone> SpatialIndex<T> {
 
     /// Query items within geographic bounds.
     pub fn query_bounds(&self, bounds: &GeoBounds) -> Vec<&T> {
-        self.query_bbox(bounds.min_lat, bounds.min_lon, bounds.max_lat, bounds.max_lon)
+        self.query_bbox(
+            bounds.min_lat,
+            bounds.min_lon,
+            bounds.max_lat,
+            bounds.max_lon,
+        )
     }
 
     /// Query items within a radius of a point.
@@ -141,10 +147,10 @@ impl<T: Clone> SpatialIndex<T> {
         // Convert to approximate degree radius for initial R-tree query
         // 1 degree latitude ≈ 111,320 meters
         let degree_radius = radius_meters / 111_320.0 * 1.5; // Add buffer
-        
+
         // Get candidates from R-tree
         let candidates = self.query_radius(lat, lon, degree_radius);
-        
+
         // Return all candidates within the approximate radius
         // (precise Haversine filtering would require storing locations)
         candidates
@@ -204,7 +210,7 @@ mod tests {
         let mut index = SpatialIndex::new();
         index.insert("NYC".to_string(), &Location::new(40.7128, -74.0060));
         index.insert("LA".to_string(), &Location::new(34.0522, -118.2437));
-        
+
         assert_eq!(index.len(), 2);
     }
 
@@ -215,13 +221,13 @@ mod tests {
             ("LA", Location::new(34.0522, -118.2437)),
             ("Chicago", Location::new(41.8781, -87.6298)),
         ];
-        
+
         // Build index
         let mut index: SpatialIndex<&str> = SpatialIndex::new();
         for (name, loc) in &items {
             index.insert(*name, loc);
         }
-        
+
         // Query East Coast (should find NYC)
         let results = index.query_bbox(35.0, -80.0, 45.0, -70.0);
         assert_eq!(results.len(), 1);
@@ -234,7 +240,7 @@ mod tests {
         index.insert("NYC", &Location::new(40.7128, -74.0060));
         index.insert("LA", &Location::new(34.0522, -118.2437));
         index.insert("Chicago", &Location::new(41.8781, -87.6298));
-        
+
         // Find nearest to Philadelphia (should be NYC)
         let nearest = index.nearest_one(39.9526, -75.1652);
         assert_eq!(nearest, Some(&"NYC"));
@@ -247,7 +253,7 @@ mod tests {
         index.insert("Boston", &Location::new(42.3601, -71.0589));
         index.insert("Philadelphia", &Location::new(39.9526, -75.1652));
         index.insert("LA", &Location::new(34.0522, -118.2437));
-        
+
         // Find 2 nearest to NYC
         let results = index.nearest(40.7128, -74.0060, 2);
         assert_eq!(results.len(), 2);

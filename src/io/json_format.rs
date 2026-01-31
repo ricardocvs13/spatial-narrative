@@ -3,13 +3,13 @@
 //! This format is optimized for storing and exchanging complete narratives
 //! with all metadata preserved.
 
-use std::io::{Read, Write};
-use serde::{Deserialize, Serialize};
-use crate::core::{
-    Narrative, Event, Location, Timestamp, SourceRef, SourceType, NarrativeMetadata,
-};
-use crate::{Result, Error};
 use super::format::Format;
+use crate::core::{
+    Event, Location, Narrative, NarrativeMetadata, SourceRef, SourceType, Timestamp,
+};
+use crate::{Error, Result};
+use serde::{Deserialize, Serialize};
+use std::io::{Read, Write};
 
 /// Custom JSON format handler.
 ///
@@ -63,10 +63,10 @@ impl JsonFormat {
 struct NarrativeJson {
     /// Format version for future compatibility
     version: String,
-    
+
     /// Narrative metadata
     metadata: NarrativeMetadataJson,
-    
+
     /// Events in the narrative
     events: Vec<EventJson>,
 }
@@ -120,20 +120,27 @@ struct SourceRefJson {
 impl Format for JsonFormat {
     fn import<R: Read>(&self, reader: R) -> Result<Narrative> {
         let json: NarrativeJson = serde_json::from_reader(reader)?;
-        
+
         // Check version compatibility (for now, we only support 1.0)
         if !json.version.starts_with("1.") {
-            return Err(Error::InvalidFormat(
-                format!("unsupported format version: {}", json.version)
-            ));
+            return Err(Error::InvalidFormat(format!(
+                "unsupported format version: {}",
+                json.version
+            )));
         }
 
         // Convert from JSON representation to internal types
         let metadata = NarrativeMetadata {
-            created: json.metadata.created.as_ref()
+            created: json
+                .metadata
+                .created
+                .as_ref()
                 .map(|s| Timestamp::parse(s))
                 .transpose()?,
-            modified: json.metadata.modified.as_ref()
+            modified: json
+                .metadata
+                .modified
+                .as_ref()
                 .map(|s| Timestamp::parse(s))
                 .transpose()?,
             author: json.metadata.author,
@@ -158,7 +165,8 @@ impl Format for JsonFormat {
 
             let timestamp = Timestamp::parse(&event_json.timestamp)?;
 
-            let sources: Vec<SourceRef> = event_json.sources
+            let sources: Vec<SourceRef> = event_json
+                .sources
                 .into_iter()
                 .map(|s| {
                     let source_type = match s.source_type.as_str() {
@@ -187,8 +195,7 @@ impl Format for JsonFormat {
                 text: event_json.text,
                 tags: event_json.tags,
                 sources,
-                metadata: serde_json::from_value(event_json.metadata)
-                    .unwrap_or_default(),
+                metadata: serde_json::from_value(event_json.metadata).unwrap_or_default(),
             };
             events.push(event);
         }
@@ -204,40 +211,47 @@ impl Format for JsonFormat {
 
     fn export<W: Write>(&self, narrative: &Narrative, writer: W) -> Result<()> {
         let metadata = NarrativeMetadataJson {
-                created: narrative.metadata.created.as_ref().map(|t| t.to_rfc3339()),
-                modified: narrative.metadata.modified.as_ref().map(|t| t.to_rfc3339()),
-                author: narrative.metadata.author.clone(),
-                description: narrative.metadata.description.clone(),
-                category: narrative.metadata.category.clone(),
+            created: narrative.metadata.created.as_ref().map(|t| t.to_rfc3339()),
+            modified: narrative.metadata.modified.as_ref().map(|t| t.to_rfc3339()),
+            author: narrative.metadata.author.clone(),
+            description: narrative.metadata.description.clone(),
+            category: narrative.metadata.category.clone(),
         };
 
-        let events: Vec<EventJson> = narrative.events.iter().map(|event| {
-            let location = LocationJson {
-                lat: event.location.lat,
-                lon: event.location.lon,
-                elevation: event.location.elevation,
+        let events: Vec<EventJson> = narrative
+            .events
+            .iter()
+            .map(|event| {
+                let location = LocationJson {
+                    lat: event.location.lat,
+                    lon: event.location.lon,
+                    elevation: event.location.elevation,
                     uncertainty_meters: event.location.uncertainty_meters,
                     name: event.location.name.clone(),
-            };
+                };
 
-            EventJson {
-                id: event.id.to_string(),
-                location,
-                timestamp: event.timestamp.to_rfc3339(),
-                text: event.text.clone(),
-                tags: event.tags.clone(),
-                    sources: event.sources.iter().map(|s| {
-                        SourceRefJson {
+                EventJson {
+                    id: event.id.to_string(),
+                    location,
+                    timestamp: event.timestamp.to_rfc3339(),
+                    text: event.text.clone(),
+                    tags: event.tags.clone(),
+                    sources: event
+                        .sources
+                        .iter()
+                        .map(|s| SourceRefJson {
                             source_type: s.source_type.to_string(),
                             title: s.title.clone(),
                             author: s.author.clone(),
                             url: s.url.clone(),
                             date: s.date.as_ref().map(|ts| ts.to_rfc3339()),
-                        }
-                    }).collect(),
-                metadata: serde_json::to_value(&event.metadata).unwrap_or(serde_json::Value::Object(serde_json::Map::new())),
-            }
-        }).collect();
+                        })
+                        .collect(),
+                    metadata: serde_json::to_value(&event.metadata)
+                        .unwrap_or(serde_json::Value::Object(serde_json::Map::new())),
+                }
+            })
+            .collect();
 
         let json = NarrativeJson {
             version: "1.0".to_string(),
@@ -300,7 +314,7 @@ mod tests {
 
         let format = JsonFormat::new();
         let result = format.import_str(json);
-        
+
         assert!(result.is_err());
     }
 
@@ -316,9 +330,7 @@ mod tests {
             .source(source)
             .build();
 
-        let narrative = Narrative::builder()
-            .event(event)
-            .build();
+        let narrative = Narrative::builder().event(event).build();
 
         let format = JsonFormat::new();
         let json = format.export_str(&narrative).unwrap();
@@ -326,7 +338,13 @@ mod tests {
 
         let restored_event = &restored.events()[0];
         assert!(!restored_event.sources.is_empty());
-        assert_eq!(restored_event.sources[0].title, Some("Test Source".to_string()));
-        assert_eq!(restored_event.sources[0].url, Some("https://example.com".to_string()));
+        assert_eq!(
+            restored_event.sources[0].title,
+            Some("Test Source".to_string())
+        );
+        assert_eq!(
+            restored_event.sources[0].url,
+            Some("https://example.com".to_string())
+        );
     }
 }

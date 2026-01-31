@@ -2,8 +2,8 @@
 //!
 //! Run with: `cargo run --example indexing`
 
-use spatial_narrative::core::{Location, Timestamp, GeoBounds, TimeRange};
-use spatial_narrative::index::{SpatialIndex, TemporalIndex, SpatiotemporalIndex, GridSpec};
+use spatial_narrative::core::{GeoBounds, Location, TimeRange, Timestamp};
+use spatial_narrative::index::{GridSpec, SpatialIndex, SpatiotemporalIndex, TemporalIndex};
 
 fn main() {
     println!("=== Spatial Narrative - Indexing ===\n");
@@ -30,7 +30,7 @@ fn main() {
 fn demonstrate_spatial_index() {
     // Create index for city names
     let mut index: SpatialIndex<&str> = SpatialIndex::new();
-    
+
     // Add cities across the world
     let cities = vec![
         ("New York", 40.7128, -74.0060),
@@ -75,7 +75,7 @@ fn demonstrate_spatial_index() {
 fn demonstrate_temporal_index() {
     // Create index for event descriptions
     let mut index: TemporalIndex<&str> = TemporalIndex::new();
-    
+
     // Add events throughout a day
     let events = vec![
         ("Wake up", "2024-03-20T07:00:00Z"),
@@ -101,7 +101,7 @@ fn demonstrate_temporal_index() {
     let work_start = Timestamp::parse("2024-03-20T09:00:00Z").unwrap();
     let work_end = Timestamp::parse("2024-03-20T17:00:00Z").unwrap();
     let work_range = TimeRange::new(work_start, work_end);
-    
+
     let work_events = index.query_range(&work_range);
     println!("\nEvents during work hours (9 AM - 5 PM):");
     for event in work_events {
@@ -110,7 +110,7 @@ fn demonstrate_temporal_index() {
 
     // Before/After queries
     let noon = Timestamp::parse("2024-03-20T12:00:00Z").unwrap();
-    
+
     let morning_events = index.before(&noon);
     println!("\nEvents before noon:");
     for event in morning_events {
@@ -129,17 +129,47 @@ fn demonstrate_temporal_index() {
 fn demonstrate_spatiotemporal_index() {
     // Create a spatiotemporal index tracking delivery truck locations
     let mut index: SpatiotemporalIndex<String> = SpatiotemporalIndex::new();
-    
+
     // Simulate a delivery route
     let route = vec![
-        ("Warehouse departure", 40.7128, -74.0060, "2024-03-20T08:00:00Z"),
-        ("Stop 1: Brooklyn", 40.6782, -73.9442, "2024-03-20T08:45:00Z"),
+        (
+            "Warehouse departure",
+            40.7128,
+            -74.0060,
+            "2024-03-20T08:00:00Z",
+        ),
+        (
+            "Stop 1: Brooklyn",
+            40.6782,
+            -73.9442,
+            "2024-03-20T08:45:00Z",
+        ),
         ("Stop 2: Queens", 40.7282, -73.7949, "2024-03-20T09:30:00Z"),
         ("Stop 3: Bronx", 40.8448, -73.8648, "2024-03-20T10:15:00Z"),
-        ("Lunch break: Manhattan", 40.7580, -73.9855, "2024-03-20T12:00:00Z"),
-        ("Stop 4: Staten Island", 40.5795, -74.1502, "2024-03-20T14:00:00Z"),
-        ("Stop 5: Jersey City", 40.7178, -74.0431, "2024-03-20T15:30:00Z"),
-        ("Return to warehouse", 40.7128, -74.0060, "2024-03-20T17:00:00Z"),
+        (
+            "Lunch break: Manhattan",
+            40.7580,
+            -73.9855,
+            "2024-03-20T12:00:00Z",
+        ),
+        (
+            "Stop 4: Staten Island",
+            40.5795,
+            -74.1502,
+            "2024-03-20T14:00:00Z",
+        ),
+        (
+            "Stop 5: Jersey City",
+            40.7178,
+            -74.0431,
+            "2024-03-20T15:30:00Z",
+        ),
+        (
+            "Return to warehouse",
+            40.7128,
+            -74.0060,
+            "2024-03-20T17:00:00Z",
+        ),
     ];
 
     for (desc, lat, lon, ts) in &route {
@@ -186,7 +216,7 @@ fn demonstrate_spatiotemporal_index() {
 fn demonstrate_heatmap() {
     // Create an index with many events to visualize density
     let mut index: SpatiotemporalIndex<i32> = SpatiotemporalIndex::new();
-    
+
     // Simulate event clusters in different areas
     let clusters = vec![
         // High-density cluster in Manhattan (20 events)
@@ -201,13 +231,13 @@ fn demonstrate_heatmap() {
 
     let mut event_id = 0;
     let base_ts = Timestamp::parse("2024-03-20T12:00:00Z").unwrap();
-    
+
     for (lat, lon, count) in clusters {
         for i in 0..count {
             // Add slight variation to locations
             let lat_offset = (i as f64 * 0.001) - (count as f64 * 0.0005);
             let lon_offset = (i as f64 * 0.0015) - (count as f64 * 0.00075);
-            
+
             index.insert(
                 event_id,
                 &Location::new(lat + lat_offset, lon + lon_offset),
@@ -243,5 +273,8 @@ fn demonstrate_heatmap() {
     }
 
     println!("\nMax events in a cell: {}", heatmap.max_count);
-    println!("Hotspot normalized value: {:.2}", heatmap.get_normalized(2, 2));
+    println!(
+        "Hotspot normalized value: {:.2}",
+        heatmap.get_normalized(2, 2)
+    );
 }

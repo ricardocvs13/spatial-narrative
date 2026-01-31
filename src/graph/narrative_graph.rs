@@ -2,13 +2,13 @@
 //!
 //! Uses petgraph for the underlying graph structure.
 
-use std::collections::HashMap;
+use petgraph::algo::{dijkstra, has_path_connecting};
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::visit::EdgeRef;
-use petgraph::algo::{dijkstra, has_path_connecting};
 use petgraph::Direction;
+use std::collections::HashMap;
 
-use crate::core::{Event, EventId, GeoBounds, TimeRange, Location};
+use crate::core::{Event, EventId, GeoBounds, Location, TimeRange};
 
 /// Unique identifier for a node in the narrative graph.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -149,7 +149,8 @@ impl NarrativeGraph {
 
     /// Connect two events with an edge.
     pub fn connect(&mut self, from: NodeId, to: NodeId, edge_type: EdgeType) {
-        self.graph.add_edge(from.0, to.0, EdgeWeight::new(edge_type));
+        self.graph
+            .add_edge(from.0, to.0, EdgeWeight::new(edge_type));
     }
 
     /// Connect two events with a weighted edge.
@@ -201,15 +202,17 @@ impl NarrativeGraph {
     /// Iterate over all nodes.
     pub fn nodes(&self) -> impl Iterator<Item = (NodeId, &Event)> {
         self.graph.node_indices().filter_map(|idx| {
-            self.graph.node_weight(idx).map(|event| (NodeId(idx), event))
+            self.graph
+                .node_weight(idx)
+                .map(|event| (NodeId(idx), event))
         })
     }
 
     /// Iterate over all edges.
     pub fn edges(&self) -> impl Iterator<Item = (NodeId, NodeId, &EdgeWeight)> {
-        self.graph.edge_references().map(|edge| {
-            (NodeId(edge.source()), NodeId(edge.target()), edge.weight())
-        })
+        self.graph
+            .edge_references()
+            .map(|edge| (NodeId(edge.source()), NodeId(edge.target()), edge.weight()))
     }
 
     /// Find the shortest path between two nodes.
@@ -217,9 +220,7 @@ impl NarrativeGraph {
     /// Returns path information including the sequence of nodes and total weight.
     pub fn shortest_path(&self, from: NodeId, to: NodeId) -> Option<PathInfo> {
         // Use Dijkstra with inverted weights (higher weight = lower cost)
-        let costs = dijkstra(&self.graph, from.0, Some(to.0), |e| {
-            1.0 - e.weight().weight
-        });
+        let costs = dijkstra(&self.graph, from.0, Some(to.0), |e| 1.0 - e.weight().weight);
 
         if !costs.contains_key(&to.0) {
             return None;
@@ -230,15 +231,15 @@ impl NarrativeGraph {
         let mut current = to.0;
 
         while current != from.0 {
-            let predecessors: Vec<_> = self.graph
+            let predecessors: Vec<_> = self
+                .graph
                 .neighbors_directed(current, Direction::Incoming)
                 .collect();
 
-            let best = predecessors.iter()
+            let best = predecessors
+                .iter()
                 .filter(|&&n| costs.contains_key(&n))
-                .min_by(|&&a, &&b| {
-                    costs[&a].partial_cmp(&costs[&b]).unwrap()
-                });
+                .min_by(|&&a, &&b| costs[&a].partial_cmp(&costs[&b]).unwrap());
 
             if let Some(&next) = best {
                 path.push(NodeId(next));
@@ -269,9 +270,13 @@ impl NarrativeGraph {
     ///
     /// Creates edges from earlier events to later events.
     pub fn connect_temporal(&mut self) {
-        let mut nodes: Vec<_> = self.graph.node_indices()
+        let mut nodes: Vec<_> = self
+            .graph
+            .node_indices()
             .filter_map(|idx| {
-                self.graph.node_weight(idx).map(|e| (idx, e.timestamp.clone()))
+                self.graph
+                    .node_weight(idx)
+                    .map(|e| (idx, e.timestamp.clone()))
             })
             .collect();
 
@@ -280,7 +285,8 @@ impl NarrativeGraph {
         for window in nodes.windows(2) {
             if let [a, b] = window {
                 if !self.graph.contains_edge(a.0, b.0) {
-                    self.graph.add_edge(a.0, b.0, EdgeWeight::new(EdgeType::Temporal));
+                    self.graph
+                        .add_edge(a.0, b.0, EdgeWeight::new(EdgeType::Temporal));
                 }
             }
         }
@@ -290,9 +296,13 @@ impl NarrativeGraph {
     ///
     /// Creates edges between events within the given distance threshold (in meters).
     pub fn connect_spatial(&mut self, max_distance_km: f64) {
-        let nodes: Vec<_> = self.graph.node_indices()
+        let nodes: Vec<_> = self
+            .graph
+            .node_indices()
             .filter_map(|idx| {
-                self.graph.node_weight(idx).map(|e| (idx, e.location.clone()))
+                self.graph
+                    .node_weight(idx)
+                    .map(|e| (idx, e.location.clone()))
             })
             .collect();
 
@@ -302,7 +312,7 @@ impl NarrativeGraph {
                 if dist <= max_distance_km {
                     let weight = 1.0 - (dist / max_distance_km);
                     let edge = EdgeWeight::with_weight(EdgeType::Spatial, weight);
-                    
+
                     // Add bidirectional edges for spatial proximity
                     if !self.graph.contains_edge(nodes[i].0, nodes[j].0) {
                         self.graph.add_edge(nodes[i].0, nodes[j].0, edge.clone());
@@ -317,23 +327,21 @@ impl NarrativeGraph {
 
     /// Automatically connect events that share tags.
     pub fn connect_thematic(&mut self) {
-        let nodes: Vec<_> = self.graph.node_indices()
-            .filter_map(|idx| {
-                self.graph.node_weight(idx).map(|e| (idx, e.tags.clone()))
-            })
+        let nodes: Vec<_> = self
+            .graph
+            .node_indices()
+            .filter_map(|idx| self.graph.node_weight(idx).map(|e| (idx, e.tags.clone())))
             .collect();
 
         for i in 0..nodes.len() {
             for j in (i + 1)..nodes.len() {
-                let shared: usize = nodes[i].1.iter()
-                    .filter(|t| nodes[j].1.contains(t))
-                    .count();
+                let shared: usize = nodes[i].1.iter().filter(|t| nodes[j].1.contains(t)).count();
 
                 if shared > 0 {
                     let total = nodes[i].1.len().max(nodes[j].1.len());
                     let weight = shared as f64 / total as f64;
                     let edge = EdgeWeight::with_weight(EdgeType::Thematic, weight);
-                    
+
                     // Add bidirectional edges for thematic similarity
                     if !self.graph.contains_edge(nodes[i].0, nodes[j].0) {
                         self.graph.add_edge(nodes[i].0, nodes[j].0, edge.clone());
@@ -348,7 +356,8 @@ impl NarrativeGraph {
 
     /// Extract a subgraph containing only events within a time range.
     pub fn subgraph_temporal(&self, range: &TimeRange) -> SubgraphResult {
-        let nodes: Vec<NodeId> = self.nodes()
+        let nodes: Vec<NodeId> = self
+            .nodes()
             .filter(|(_, event)| range.contains(&event.timestamp))
             .map(|(id, _)| id)
             .collect();
@@ -358,7 +367,8 @@ impl NarrativeGraph {
 
     /// Extract a subgraph containing only events within geographic bounds.
     pub fn subgraph_spatial(&self, bounds: &GeoBounds) -> SubgraphResult {
-        let nodes: Vec<NodeId> = self.nodes()
+        let nodes: Vec<NodeId> = self
+            .nodes()
             .filter(|(_, event)| bounds.contains(&event.location))
             .map(|(id, _)| id)
             .collect();
@@ -394,17 +404,22 @@ impl NarrativeGraph {
 
     /// Get the in-degree of a node (number of incoming edges).
     pub fn in_degree(&self, node: NodeId) -> usize {
-        self.graph.edges_directed(node.0, Direction::Incoming).count()
+        self.graph
+            .edges_directed(node.0, Direction::Incoming)
+            .count()
     }
 
     /// Get the out-degree of a node (number of outgoing edges).
     pub fn out_degree(&self, node: NodeId) -> usize {
-        self.graph.edges_directed(node.0, Direction::Outgoing).count()
+        self.graph
+            .edges_directed(node.0, Direction::Outgoing)
+            .count()
     }
 
     /// Find nodes with no predecessors (roots/sources).
     pub fn roots(&self) -> Vec<NodeId> {
-        self.graph.node_indices()
+        self.graph
+            .node_indices()
             .filter(|&idx| self.graph.edges_directed(idx, Direction::Incoming).count() == 0)
             .map(NodeId)
             .collect()
@@ -412,7 +427,8 @@ impl NarrativeGraph {
 
     /// Find nodes with no successors (leaves/sinks).
     pub fn leaves(&self) -> Vec<NodeId> {
-        self.graph.node_indices()
+        self.graph
+            .node_indices()
             .filter(|&idx| self.graph.edges_directed(idx, Direction::Outgoing).count() == 0)
             .map(NodeId)
             .collect()
@@ -448,11 +464,13 @@ impl NarrativeGraph {
     pub fn to_dot_with_options(&self, options: DotOptions) -> String {
         let mut output = String::new();
         output.push_str("digraph NarrativeGraph {\n");
-        
+
         // Graph attributes
         output.push_str(&format!("    rankdir={};\n", options.rank_direction));
-        output.push_str(&format!("    node [shape={}, fontname=\"{}\"];\n", 
-            options.node_shape, options.font_name));
+        output.push_str(&format!(
+            "    node [shape={}, fontname=\"{}\"];\n",
+            options.node_shape, options.font_name
+        ));
         output.push_str(&format!("    edge [fontname=\"{}\"];\n", options.font_name));
         output.push('\n');
 
@@ -467,16 +485,19 @@ impl NarrativeGraph {
                 event.location.lon,
                 event.timestamp.to_rfc3339()
             ));
-            
+
             // Color by edge type if connected
             let color = self.get_node_color(NodeId(idx));
-            
+
             output.push_str(&format!(
                 "    n{} [label=\"{}\", tooltip=\"{}\", fillcolor=\"{}\", style=filled];\n",
-                idx.index(), label, tooltip, color
+                idx.index(),
+                label,
+                tooltip,
+                color
             ));
         }
-        
+
         output.push('\n');
 
         // Edges
@@ -485,7 +506,7 @@ impl NarrativeGraph {
             let color = Self::edge_type_color(&weight.edge_type);
             let style = Self::edge_type_style(&weight.edge_type);
             let label = weight.label.as_deref().unwrap_or("");
-            
+
             output.push_str(&format!(
                 "    n{} -> n{} [color=\"{}\", style={}, label=\"{}\", penwidth={}];\n",
                 edge.source().index(),
@@ -505,7 +526,9 @@ impl NarrativeGraph {
     ///
     /// Returns a JSON object with nodes and edges arrays.
     pub fn to_json(&self) -> String {
-        let nodes: Vec<serde_json::Value> = self.graph.node_indices()
+        let nodes: Vec<serde_json::Value> = self
+            .graph
+            .node_indices()
             .map(|idx| {
                 let event = &self.graph[idx];
                 serde_json::json!({
@@ -524,7 +547,9 @@ impl NarrativeGraph {
             })
             .collect();
 
-        let edges: Vec<serde_json::Value> = self.graph.edge_references()
+        let edges: Vec<serde_json::Value> = self
+            .graph
+            .edge_references()
             .map(|edge| {
                 let weight = edge.weight();
                 serde_json::json!({
@@ -544,12 +569,15 @@ impl NarrativeGraph {
                 "node_count": self.node_count(),
                 "edge_count": self.edge_count()
             }
-        }).to_string()
+        })
+        .to_string()
     }
 
     /// Export to JSON with pretty printing.
     pub fn to_json_pretty(&self) -> String {
-        let nodes: Vec<serde_json::Value> = self.graph.node_indices()
+        let nodes: Vec<serde_json::Value> = self
+            .graph
+            .node_indices()
             .map(|idx| {
                 let event = &self.graph[idx];
                 serde_json::json!({
@@ -568,7 +596,9 @@ impl NarrativeGraph {
             })
             .collect();
 
-        let edges: Vec<serde_json::Value> = self.graph.edge_references()
+        let edges: Vec<serde_json::Value> = self
+            .graph
+            .edge_references()
             .map(|edge| {
                 let weight = edge.weight();
                 serde_json::json!({
@@ -588,7 +618,8 @@ impl NarrativeGraph {
                 "node_count": self.node_count(),
                 "edge_count": self.edge_count()
             }
-        })).unwrap_or_default()
+        }))
+        .unwrap_or_default()
     }
 
     // Helper methods for DOT export
@@ -610,11 +641,11 @@ impl NarrativeGraph {
         // Color based on connectivity
         let in_deg = self.in_degree(node);
         let out_deg = self.out_degree(node);
-        
+
         if in_deg == 0 && out_deg > 0 {
             "#90EE90" // Light green for roots
         } else if out_deg == 0 && in_deg > 0 {
-            "#FFB6C1" // Light pink for leaves  
+            "#FFB6C1" // Light pink for leaves
         } else if in_deg > 2 || out_deg > 2 {
             "#87CEEB" // Light blue for hubs
         } else {
@@ -762,9 +793,9 @@ mod tests {
     fn test_graph_add_event() {
         let mut graph = NarrativeGraph::new();
         let event = make_event(40.7128, -74.0060, "2024-01-01T12:00:00Z", "NYC Event");
-        
+
         let node = graph.add_event(event.clone());
-        
+
         assert_eq!(graph.node_count(), 1);
         assert_eq!(graph.event(node).unwrap().text, "NYC Event");
     }
@@ -774,9 +805,9 @@ mod tests {
         let mut graph = NarrativeGraph::new();
         let n1 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T10:00:00Z", "Event 1"));
         let n2 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T12:00:00Z", "Event 2"));
-        
+
         graph.connect(n1, n2, EdgeType::Temporal);
-        
+
         assert!(graph.are_connected(n1, n2));
         assert!(!graph.are_connected(n2, n1)); // Directed!
         assert_eq!(graph.edge_count(), 1);
@@ -788,10 +819,10 @@ mod tests {
         let n1 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T10:00:00Z", "Event 1"));
         let n2 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T12:00:00Z", "Event 2"));
         let n3 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T14:00:00Z", "Event 3"));
-        
+
         graph.connect(n1, n2, EdgeType::Temporal);
         graph.connect(n1, n3, EdgeType::Temporal);
-        
+
         assert_eq!(graph.successors(n1).len(), 2);
         assert_eq!(graph.predecessors(n2).len(), 1);
         assert_eq!(graph.predecessors(n1).len(), 0);
@@ -803,9 +834,9 @@ mod tests {
         graph.add_event(make_event(40.7, -74.0, "2024-01-01T14:00:00Z", "Third"));
         graph.add_event(make_event(40.7, -74.0, "2024-01-01T10:00:00Z", "First"));
         graph.add_event(make_event(40.7, -74.0, "2024-01-01T12:00:00Z", "Second"));
-        
+
         graph.connect_temporal();
-        
+
         // Should have edges: First -> Second -> Third
         assert_eq!(graph.edge_count(), 2);
     }
@@ -813,23 +844,23 @@ mod tests {
     #[test]
     fn test_graph_connect_thematic() {
         let mut graph = NarrativeGraph::new();
-        
+
         let mut e1 = make_event(40.7, -74.0, "2024-01-01T10:00:00Z", "Event 1");
         e1.add_tag("politics");
         e1.add_tag("economy");
-        
+
         let mut e2 = make_event(40.7, -74.0, "2024-01-01T12:00:00Z", "Event 2");
         e2.add_tag("politics");
-        
+
         let mut e3 = make_event(40.7, -74.0, "2024-01-01T14:00:00Z", "Event 3");
         e3.add_tag("sports");
-        
+
         graph.add_event(e1);
         graph.add_event(e2);
         graph.add_event(e3);
-        
+
         graph.connect_thematic();
-        
+
         // Only e1 and e2 share tags
         let thematic_edges = graph.edges_of_type(EdgeType::Thematic);
         assert_eq!(thematic_edges.len(), 2); // Bidirectional
@@ -841,13 +872,13 @@ mod tests {
         let n1 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T10:00:00Z", "Root"));
         let n2 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T12:00:00Z", "Middle"));
         let n3 = graph.add_event(make_event(40.7, -74.0, "2024-01-01T14:00:00Z", "Leaf"));
-        
+
         graph.connect(n1, n2, EdgeType::Temporal);
         graph.connect(n2, n3, EdgeType::Temporal);
-        
+
         let roots = graph.roots();
         let leaves = graph.leaves();
-        
+
         assert_eq!(roots.len(), 1);
         assert_eq!(roots[0], n1);
         assert_eq!(leaves.len(), 1);
@@ -858,9 +889,9 @@ mod tests {
     fn test_haversine_distance() {
         let nyc = Location::new(40.7128, -74.0060);
         let la = Location::new(34.0522, -118.2437);
-        
+
         let distance = haversine_distance(&nyc, &la);
-        
+
         // NYC to LA is roughly 3940 km
         assert!(distance > 3900.0 && distance < 4000.0);
     }

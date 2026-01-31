@@ -1,8 +1,8 @@
 //! Format trait for import/export operations.
 
-use std::io::{Read, Write};
 use crate::core::Narrative;
 use crate::Result;
+use std::io::{Read, Write};
 
 /// Trait for formats that can import and export narratives.
 ///

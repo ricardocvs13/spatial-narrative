@@ -25,8 +25,8 @@
 //! assert!(!results.is_empty());
 //! ```
 
+use crate::core::{TimeRange, Timestamp};
 use std::collections::BTreeMap;
-use crate::core::{Timestamp, TimeRange};
 
 /// Temporal index for efficient time-based queries.
 ///
@@ -69,7 +69,7 @@ impl<T: Clone> TemporalIndex<T> {
     pub fn insert(&mut self, item: T, timestamp: &Timestamp) {
         let idx = self.items.len();
         let key = timestamp.to_unix_millis();
-        
+
         self.items.push(item);
         self.timestamps.push(timestamp.clone());
         self.tree.entry(key).or_insert_with(Vec::new).push(idx);
@@ -79,7 +79,7 @@ impl<T: Clone> TemporalIndex<T> {
     pub fn query_range(&self, range: &TimeRange) -> Vec<&T> {
         let start_key = range.start.to_unix_millis();
         let end_key = range.end.to_unix_millis();
-        
+
         self.tree
             .range(start_key..=end_key)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.items[i]))
@@ -89,7 +89,7 @@ impl<T: Clone> TemporalIndex<T> {
     /// Query items before a timestamp.
     pub fn before(&self, timestamp: &Timestamp) -> Vec<&T> {
         let key = timestamp.to_unix_millis();
-        
+
         self.tree
             .range(..key)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.items[i]))
@@ -99,7 +99,7 @@ impl<T: Clone> TemporalIndex<T> {
     /// Query items after a timestamp.
     pub fn after(&self, timestamp: &Timestamp) -> Vec<&T> {
         let key = timestamp.to_unix_millis();
-        
+
         self.tree
             .range((key + 1)..)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.items[i]))
@@ -109,7 +109,7 @@ impl<T: Clone> TemporalIndex<T> {
     /// Query items at or before a timestamp.
     pub fn at_or_before(&self, timestamp: &Timestamp) -> Vec<&T> {
         let key = timestamp.to_unix_millis();
-        
+
         self.tree
             .range(..=key)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.items[i]))
@@ -119,7 +119,7 @@ impl<T: Clone> TemporalIndex<T> {
     /// Query items at or after a timestamp.
     pub fn at_or_after(&self, timestamp: &Timestamp) -> Vec<&T> {
         let key = timestamp.to_unix_millis();
-        
+
         self.tree
             .range(key..)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.items[i]))
@@ -163,10 +163,10 @@ impl<T: Clone> TemporalIndex<T> {
     pub fn time_range(&self) -> Option<TimeRange> {
         let first_key = self.tree.keys().next()?;
         let last_key = self.tree.keys().next_back()?;
-        
+
         let start = Timestamp::from_unix_millis(*first_key)?;
         let end = Timestamp::from_unix_millis(*last_key)?;
-        
+
         Some(TimeRange::new(start, end))
     }
 
@@ -214,15 +214,17 @@ impl<'a, T: Clone> Iterator for SlidingWindowIter<'a, T> {
     fn next(&mut self) -> Option<Self::Item> {
         let start = self.current_start?;
         let end = start + self.window_millis;
-        
+
         // Find next window start
         self.current_start = self.index.tree.range((start + 1)..).next().map(|(k, _)| *k);
-        
-        let items: Vec<_> = self.index.tree
+
+        let items: Vec<_> = self
+            .index
+            .tree
             .range(start..end)
             .flat_map(|(_, indices)| indices.iter().map(|&i| &self.index.items[i]))
             .collect();
-        
+
         if items.is_empty() && self.current_start.is_some() {
             self.next() // Skip empty windows
         } else if items.is_empty() {
@@ -253,7 +255,7 @@ mod tests {
         index.insert("Morning", &make_timestamp(9));
         index.insert("Noon", &make_timestamp(12));
         index.insert("Evening", &make_timestamp(18));
-        
+
         assert_eq!(index.len(), 3);
     }
 
@@ -264,10 +266,10 @@ mod tests {
         index.insert("12pm", &make_timestamp(12));
         index.insert("3pm", &make_timestamp(15));
         index.insert("6pm", &make_timestamp(18));
-        
+
         let range = TimeRange::new(make_timestamp(11), make_timestamp(16));
         let results = index.query_range(&range);
-        
+
         assert_eq!(results.len(), 2);
     }
 
@@ -277,11 +279,11 @@ mod tests {
         index.insert("9am", &make_timestamp(9));
         index.insert("12pm", &make_timestamp(12));
         index.insert("3pm", &make_timestamp(15));
-        
+
         let before = index.before(&make_timestamp(12));
         assert_eq!(before.len(), 1);
         assert_eq!(*before[0], "9am");
-        
+
         let after = index.after(&make_timestamp(12));
         assert_eq!(after.len(), 1);
         assert_eq!(*after[0], "3pm");
@@ -293,7 +295,7 @@ mod tests {
         index.insert("First", &make_timestamp(8));
         index.insert("Middle", &make_timestamp(12));
         index.insert("Last", &make_timestamp(20));
-        
+
         assert_eq!(index.first(), Some(&"First"));
         assert_eq!(index.last(), Some(&"Last"));
     }
@@ -305,7 +307,7 @@ mod tests {
         index.insert("C", &make_timestamp(15));
         index.insert("A", &make_timestamp(9));
         index.insert("B", &make_timestamp(12));
-        
+
         let ordered: Vec<_> = index.chronological();
         assert_eq!(ordered, vec![&"A", &"B", &"C"]);
     }

@@ -2,13 +2,9 @@
 //!
 //! Run with: `cargo run --example io_formats`
 
-use spatial_narrative::core::{
-    EventBuilder, Location, Narrative, NarrativeBuilder, Timestamp,
-};
+use spatial_narrative::core::{EventBuilder, Location, Narrative, NarrativeBuilder, Timestamp};
 use spatial_narrative::io::{
-    Format, GeoJsonFormat, GeoJsonOptions, 
-    CsvFormat, CsvOptions,
-    JsonFormat,
+    CsvFormat, CsvOptions, Format, GeoJsonFormat, GeoJsonOptions, JsonFormat,
 };
 
 fn main() {
@@ -22,7 +18,7 @@ fn main() {
     println!("--- JSON Format ---\n");
     demonstrate_json_format(&narrative);
 
-    // 2. GeoJSON Format  
+    // 2. GeoJSON Format
     println!("\n--- GeoJSON Format ---\n");
     demonstrate_geojson_format(&narrative);
 
@@ -76,7 +72,7 @@ fn demonstrate_json_format(narrative: &Narrative) {
                 println!("... [truncated]");
             }
             println!("\nTotal JSON size: {} bytes", output.len());
-        }
+        },
         Err(e) => println!("JSON export error: {}", e),
     }
 
@@ -111,7 +107,7 @@ fn demonstrate_geojson_format(narrative: &Narrative) {
             println!("  - Mapbox GL JS");
             println!("  - QGIS");
             println!("  - Google Earth");
-        }
+        },
         Err(e) => println!("GeoJSON export error: {}", e),
     }
 }
@@ -130,7 +126,7 @@ fn demonstrate_csv_format(narrative: &Narrative) {
             println!("  - Spreadsheet analysis (Excel, Google Sheets)");
             println!("  - Data science workflows (pandas, R)");
             println!("  - Database imports");
-        }
+        },
         Err(e) => println!("CSV export error: {}", e),
     }
 

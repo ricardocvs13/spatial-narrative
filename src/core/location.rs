@@ -1,7 +1,7 @@
 //! Geographic location representation.
 
-use serde::{Deserialize, Serialize};
 use crate::error::{Error, Result};
+use serde::{Deserialize, Serialize};
 
 /// A geographic location using WGS84 coordinates.
 ///

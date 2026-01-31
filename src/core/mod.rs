@@ -7,18 +7,18 @@
 //! - [`Narrative`] - A collection of related events
 //! - [`SourceRef`] - Reference to source material
 
-mod location;
-mod timestamp;
+mod bounds;
 mod event;
+mod location;
 mod narrative;
 mod source;
-mod bounds;
+mod timestamp;
 mod traits;
 
-pub use location::{Location, LocationBuilder};
-pub use timestamp::{Timestamp, TemporalPrecision};
+pub use bounds::{GeoBounds, TimeRange};
 pub use event::{Event, EventBuilder, EventId};
+pub use location::{Location, LocationBuilder};
 pub use narrative::{Narrative, NarrativeBuilder, NarrativeId, NarrativeMetadata};
 pub use source::{SourceRef, SourceType};
-pub use bounds::{GeoBounds, TimeRange};
+pub use timestamp::{TemporalPrecision, Timestamp};
 pub use traits::{SpatialEntity, TemporalEntity};

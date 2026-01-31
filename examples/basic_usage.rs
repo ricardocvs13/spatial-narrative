@@ -3,8 +3,8 @@
 //! Run with: `cargo run --example basic_usage`
 
 use spatial_narrative::core::{
-    EventBuilder, Location, NarrativeBuilder, 
-    SourceRef, SourceType, Timestamp, GeoBounds, TimeRange,
+    EventBuilder, GeoBounds, Location, NarrativeBuilder, SourceRef, SourceType, TimeRange,
+    Timestamp,
 };
 
 fn main() {
@@ -88,9 +88,21 @@ fn main() {
         .build();
 
     println!("Created events:");
-    println!("  - Event 1: {} @ {}", event1.text, event1.location.name.as_deref().unwrap_or("Unknown"));
-    println!("  - Event 2: {} @ {}", event2.text, event2.location.name.as_deref().unwrap_or("Unknown"));
-    println!("  - Event 3: {} @ {}", event3.text, event3.location.name.as_deref().unwrap_or("Unknown"));
+    println!(
+        "  - Event 1: {} @ {}",
+        event1.text,
+        event1.location.name.as_deref().unwrap_or("Unknown")
+    );
+    println!(
+        "  - Event 2: {} @ {}",
+        event2.text,
+        event2.location.name.as_deref().unwrap_or("Unknown")
+    );
+    println!(
+        "  - Event 3: {} @ {}",
+        event3.text,
+        event3.location.name.as_deref().unwrap_or("Unknown")
+    );
     println!();
 
     // 5. Create a narrative
@@ -115,16 +127,22 @@ fn main() {
     let chronological = narrative.events_chronological();
     println!("Events in chronological order:");
     for event in chronological {
-        println!("  - {} | {}", event.timestamp.format_with_precision(), event.text);
+        println!(
+            "  - {} | {}",
+            event.timestamp.format_with_precision(),
+            event.text
+        );
     }
     println!();
 
     // Get time range
     if let Some(range) = narrative.time_range() {
-        println!("Time span: {} to {}", 
+        println!(
+            "Time span: {} to {}",
             range.start.format_with_precision(),
-            range.end.format_with_precision());
-        
+            range.end.format_with_precision()
+        );
+
         let duration = range.duration();
         let days = duration.num_days();
         let years = days / 365;
@@ -144,7 +162,7 @@ fn main() {
 
     // 7. Spatial filtering
     println!("=== Spatial Filtering ===\n");
-    
+
     // Filter to only Paris area
     let paris_bounds = GeoBounds::new(48.0, 2.0, 49.0, 3.0);
     let paris_events = narrative.filter_spatial(&paris_bounds);
@@ -156,12 +174,16 @@ fn main() {
 
     // 8. Temporal filtering
     println!("=== Temporal Filtering ===\n");
-    
+
     let range_1918 = TimeRange::year(1918);
     let events_1918 = narrative.filter_temporal(&range_1918);
     println!("Events in 1918: {}", events_1918.len());
     for event in events_1918 {
-        println!("  - {} | {}", event.timestamp.format_with_precision(), event.text);
+        println!(
+            "  - {} | {}",
+            event.timestamp.format_with_precision(),
+            event.text
+        );
     }
     println!();
 

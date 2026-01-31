@@ -27,6 +27,5 @@
 mod narrative_graph;
 
 pub use narrative_graph::{
-    NarrativeGraph, NodeId, EdgeType, EdgeWeight,
-    PathInfo, SubgraphResult, DotOptions,
+    DotOptions, EdgeType, EdgeWeight, NarrativeGraph, NodeId, PathInfo, SubgraphResult,
 };

@@ -1,13 +1,12 @@
 //! CSV format import/export.
 
-use std::io::{Read, Write};
-use csv::StringRecord;
-use crate::core::{
-    Narrative, NarrativeBuilder, EventBuilder,
-    Location, Timestamp, SourceRef, SourceType,
-};
-use crate::{Result, Error};
 use super::format::Format;
+use crate::core::{
+    EventBuilder, Location, Narrative, NarrativeBuilder, SourceRef, SourceType, Timestamp,
+};
+use crate::{Error, Result};
+use csv::StringRecord;
+use std::io::{Read, Write};
 
 /// CSV format handler.
 ///
@@ -39,31 +38,31 @@ pub struct CsvFormat {
 pub struct CsvOptions {
     /// Column name for latitude (defaults to "lat")
     pub lat_column: String,
-    
+
     /// Column name for longitude (defaults to "lon")
     pub lon_column: String,
-    
+
     /// Column name for timestamp (defaults to "timestamp")
     pub timestamp_column: String,
-    
+
     /// Column name for elevation (optional)
     pub elevation_column: Option<String>,
-    
+
     /// Column name for text/description (optional)
     pub text_column: Option<String>,
-    
+
     /// Column name for tags (optional, comma-separated in cell)
     pub tags_column: Option<String>,
-    
+
     /// Column name for source name (optional)
     pub source_name_column: Option<String>,
-    
+
     /// Column name for source type (optional)
     pub source_type_column: Option<String>,
-    
+
     /// Whether to include headers in exported CSV
     pub include_headers: bool,
-    
+
     /// CSV delimiter character
     pub delimiter: u8,
 }
@@ -124,35 +123,62 @@ impl Format for CsvFormat {
         let headers = csv_reader.headers()?.clone();
 
         // Find required columns
-        let lat_idx = self.find_column(&headers, &self.options.lat_column)
-            .ok_or_else(|| Error::InvalidFormat(
-                format!("missing required column: {}", self.options.lat_column)
-            ))?;
-        
-        let lon_idx = self.find_column(&headers, &self.options.lon_column)
-            .ok_or_else(|| Error::InvalidFormat(
-                format!("missing required column: {}", self.options.lon_column)
-            ))?;
-        
-        let ts_idx = self.find_column(&headers, &self.options.timestamp_column)
-            .ok_or_else(|| Error::InvalidFormat(
-                format!("missing required column: {}", self.options.timestamp_column)
-            ))?;
+        let lat_idx = self
+            .find_column(&headers, &self.options.lat_column)
+            .ok_or_else(|| {
+                Error::InvalidFormat(format!(
+                    "missing required column: {}",
+                    self.options.lat_column
+                ))
+            })?;
+
+        let lon_idx = self
+            .find_column(&headers, &self.options.lon_column)
+            .ok_or_else(|| {
+                Error::InvalidFormat(format!(
+                    "missing required column: {}",
+                    self.options.lon_column
+                ))
+            })?;
+
+        let ts_idx = self
+            .find_column(&headers, &self.options.timestamp_column)
+            .ok_or_else(|| {
+                Error::InvalidFormat(format!(
+                    "missing required column: {}",
+                    self.options.timestamp_column
+                ))
+            })?;
 
         // Find optional columns
-        let elev_idx = self.options.elevation_column.as_ref()
+        let elev_idx = self
+            .options
+            .elevation_column
+            .as_ref()
             .and_then(|col| self.find_column(&headers, col));
-        
-        let text_idx = self.options.text_column.as_ref()
+
+        let text_idx = self
+            .options
+            .text_column
+            .as_ref()
             .and_then(|col| self.find_column(&headers, col));
-        
-        let tags_idx = self.options.tags_column.as_ref()
+
+        let tags_idx = self
+            .options
+            .tags_column
+            .as_ref()
             .and_then(|col| self.find_column(&headers, col));
-        
-        let source_name_idx = self.options.source_name_column.as_ref()
+
+        let source_name_idx = self
+            .options
+            .source_name_column
+            .as_ref()
             .and_then(|col| self.find_column(&headers, col));
-        
-        let source_type_idx = self.options.source_type_column.as_ref()
+
+        let source_type_idx = self
+            .options
+            .source_type_column
+            .as_ref()
             .and_then(|col| self.find_column(&headers, col));
 
         let mut builder = NarrativeBuilder::new();
@@ -162,21 +188,25 @@ impl Format for CsvFormat {
             let record = result?;
 
             // Parse required fields
-            let lat: f64 = record.get(lat_idx)
+            let lat: f64 = record
+                .get(lat_idx)
                 .ok_or_else(|| Error::InvalidFormat(format!("missing lat at row {}", row_num)))?
                 .parse()
                 .map_err(|_| Error::InvalidFormat(format!("invalid lat at row {}", row_num)))?;
 
-            let lon: f64 = record.get(lon_idx)
+            let lon: f64 = record
+                .get(lon_idx)
                 .ok_or_else(|| Error::InvalidFormat(format!("missing lon at row {}", row_num)))?
                 .parse()
                 .map_err(|_| Error::InvalidFormat(format!("invalid lon at row {}", row_num)))?;
 
-            let ts_str = record.get(ts_idx)
-                .ok_or_else(|| Error::InvalidFormat(format!("missing timestamp at row {}", row_num)))?;
-            
-            let timestamp = Timestamp::parse(ts_str)
-                .map_err(|_| Error::InvalidFormat(format!("invalid timestamp at row {}", row_num)))?;
+            let ts_str = record.get(ts_idx).ok_or_else(|| {
+                Error::InvalidFormat(format!("missing timestamp at row {}", row_num))
+            })?;
+
+            let timestamp = Timestamp::parse(ts_str).map_err(|_| {
+                Error::InvalidFormat(format!("invalid timestamp at row {}", row_num))
+            })?;
 
             // Build location
             let mut location = Location::new(lat, lon);
@@ -187,9 +217,7 @@ impl Format for CsvFormat {
             }
 
             // Build event
-            let mut event_builder = EventBuilder::new()
-                .location(location)
-                .timestamp(timestamp);
+            let mut event_builder = EventBuilder::new().location(location).timestamp(timestamp);
 
             // Add optional fields
             if let Some(text) = self.get_optional(&record, text_idx) {
@@ -206,7 +234,8 @@ impl Format for CsvFormat {
             }
 
             if let Some(source_name) = self.get_optional(&record, source_name_idx) {
-                let source_type = self.get_optional(&record, source_type_idx)
+                let source_type = self
+                    .get_optional(&record, source_type_idx)
                     .and_then(|s| match s.to_lowercase().as_str() {
                         "article" => Some(SourceType::Article),
                         "report" => Some(SourceType::Report),
@@ -282,11 +311,19 @@ impl Format for CsvFormat {
             }
 
             if self.options.source_name_column.is_some() {
-                record.push(event.sources.first().and_then(|s| s.title.clone()).unwrap_or_default());
+                record.push(
+                    event
+                        .sources
+                        .first()
+                        .and_then(|s| s.title.clone())
+                        .unwrap_or_default(),
+                );
             }
 
             if self.options.source_type_column.is_some() {
-                let type_str = event.sources.first()
+                let type_str = event
+                    .sources
+                    .first()
                     .map(|s| s.source_type.to_string())
                     .unwrap_or_default();
                 record.push(type_str.to_string());
@@ -342,9 +379,7 @@ mod tests {
             .tag("tag2")
             .build();
 
-        let narrative = Narrative::builder()
-            .event(event)
-            .build();
+        let narrative = Narrative::builder().event(event).build();
 
         let format = CsvFormat::new();
         let exported = format.export_str(&narrative).unwrap();
@@ -358,24 +393,24 @@ mod tests {
     #[test]
     fn test_csv_missing_required_column() {
         let csv_data = "latitude,longitude\n40.7128,-74.006";
-        
+
         let format = CsvFormat::new();
         let result = format.import_str(csv_data);
-        
+
         assert!(result.is_err());
     }
 
     #[test]
     fn test_csv_custom_delimiter() {
         let tsv_data = "lat\tlon\ttimestamp\n40.7128\t-74.006\t2024-01-15T14:30:00Z";
-        
+
         let options = CsvOptions {
             delimiter: b'\t',
             ..Default::default()
         };
         let format = CsvFormat::with_options(options);
         let narrative = format.import_str(tsv_data).unwrap();
-        
+
         assert_eq!(narrative.events().len(), 1);
     }
 }

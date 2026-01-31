@@ -1,6 +1,6 @@
 //! Core traits for spatial and temporal entities.
 
-use crate::core::{Location, Timestamp, GeoBounds, TimeRange};
+use crate::core::{GeoBounds, Location, TimeRange, Timestamp};
 
 /// Trait for entities with a spatial location.
 ///

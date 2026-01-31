@@ -38,12 +38,12 @@
 //! let json = json_format.export_str(&narrative).unwrap();
 //! ```
 
+mod csv_format;
 mod format;
 mod geojson;
-mod csv_format;
 mod json_format;
 
+pub use csv_format::{CsvFormat, CsvOptions};
 pub use format::Format;
 pub use geojson::{GeoJsonFormat, GeoJsonOptions};
-pub use csv_format::{CsvFormat, CsvOptions};
 pub use json_format::JsonFormat;

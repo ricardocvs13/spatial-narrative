@@ -1,7 +1,7 @@
 //! Geographic and temporal bounds for filtering and queries.
 
+use chrono::{Datelike, Duration, TimeZone};
 use serde::{Deserialize, Serialize};
-use chrono::{Duration, Datelike, TimeZone};
 
 use crate::core::{Location, Timestamp};
 

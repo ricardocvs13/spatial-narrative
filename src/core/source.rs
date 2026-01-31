@@ -1,7 +1,7 @@
 //! Source reference types for tracking data provenance.
 
-use serde::{Deserialize, Serialize};
 use crate::core::Timestamp;
+use serde::{Deserialize, Serialize};
 
 /// Type of source material.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

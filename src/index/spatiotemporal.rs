@@ -26,8 +26,8 @@
 //! let results = index.query(&bounds, &range);
 //! ```
 
-use crate::core::{Location, Timestamp, GeoBounds, TimeRange};
 use super::{SpatialIndex, TemporalIndex};
+use crate::core::{GeoBounds, Location, TimeRange, Timestamp};
 
 /// Combined spatiotemporal index for efficient space-time queries.
 ///
@@ -73,11 +73,11 @@ impl<T: Clone> SpatiotemporalIndex<T> {
     /// Insert an item with its location and timestamp.
     pub fn insert(&mut self, item: T, location: &Location, timestamp: &Timestamp) {
         let idx = self.items.len();
-        
+
         self.items.push(item);
         self.locations.push(location.clone());
         self.timestamps.push(timestamp.clone());
-        
+
         self.spatial.insert(idx, location);
         self.temporal.insert(idx, timestamp);
     }
@@ -85,19 +85,21 @@ impl<T: Clone> SpatiotemporalIndex<T> {
     /// Query items within both spatial bounds and time range.
     pub fn query(&self, bounds: &GeoBounds, range: &TimeRange) -> Vec<&T> {
         // Get spatial candidates
-        let spatial_indices: std::collections::HashSet<usize> = self.spatial
+        let spatial_indices: std::collections::HashSet<usize> = self
+            .spatial
             .query_bounds(bounds)
             .into_iter()
             .copied()
             .collect();
-        
+
         // Get temporal candidates
-        let temporal_indices: std::collections::HashSet<usize> = self.temporal
+        let temporal_indices: std::collections::HashSet<usize> = self
+            .temporal
             .query_range(range)
             .into_iter()
             .copied()
             .collect();
-        
+
         // Intersect the results
         spatial_indices
             .intersection(&temporal_indices)
@@ -126,12 +128,13 @@ impl<T: Clone> SpatiotemporalIndex<T> {
     /// Find k nearest items to a point within a time range.
     pub fn nearest_in_range(&self, lat: f64, lon: f64, k: usize, range: &TimeRange) -> Vec<&T> {
         // Get temporal candidates first
-        let temporal_indices: std::collections::HashSet<usize> = self.temporal
+        let temporal_indices: std::collections::HashSet<usize> = self
+            .temporal
             .query_range(range)
             .into_iter()
             .copied()
             .collect();
-        
+
         // Get spatial nearest and filter by temporal
         self.spatial
             .nearest(lat, lon, k * 2) // Get more candidates to account for filtering
@@ -191,7 +194,11 @@ pub struct GridSpec {
 impl GridSpec {
     /// Create a new grid specification.
     pub fn new(bounds: GeoBounds, lat_cells: usize, lon_cells: usize) -> Self {
-        Self { bounds, lat_cells, lon_cells }
+        Self {
+            bounds,
+            lat_cells,
+            lon_cells,
+        }
     }
 
     /// Create a grid with approximately square cells.
@@ -199,11 +206,15 @@ impl GridSpec {
         let lat_range = bounds.max_lat - bounds.min_lat;
         let lon_range = bounds.max_lon - bounds.min_lon;
         let aspect = lon_range / lat_range;
-        
+
         let lat_cells = ((target_cells as f64 / aspect).sqrt() as usize).max(1);
         let lon_cells = ((target_cells as f64 * aspect).sqrt() as usize).max(1);
-        
-        Self { bounds, lat_cells, lon_cells }
+
+        Self {
+            bounds,
+            lat_cells,
+            lon_cells,
+        }
     }
 
     /// Get the cell size in degrees.
@@ -256,24 +267,28 @@ impl<T: Clone> SpatiotemporalIndex<T> {
     pub fn heatmap(&self, grid: GridSpec) -> Heatmap {
         let mut counts = vec![0usize; grid.lat_cells * grid.lon_cells];
         let (lat_size, lon_size) = grid.cell_size();
-        
+
         for loc in &self.locations {
             if !grid.bounds.contains(loc) {
                 continue;
             }
-            
+
             let lat_idx = ((loc.lat - grid.bounds.min_lat) / lat_size) as usize;
             let lon_idx = ((loc.lon - grid.bounds.min_lon) / lon_size) as usize;
-            
+
             let lat_idx = lat_idx.min(grid.lat_cells - 1);
             let lon_idx = lon_idx.min(grid.lon_cells - 1);
-            
+
             counts[lat_idx * grid.lon_cells + lon_idx] += 1;
         }
-        
+
         let max_count = counts.iter().copied().max().unwrap_or(0);
-        
-        Heatmap { grid, counts, max_count }
+
+        Heatmap {
+            grid,
+            counts,
+            max_count,
+        }
     }
 }
 
@@ -296,22 +311,38 @@ mod tests {
         let mut index = SpatiotemporalIndex::new();
         index.insert("NYC", &Location::new(40.7128, -74.0060), &make_timestamp(1));
         index.insert("LA", &Location::new(34.0522, -118.2437), &make_timestamp(5));
-        
+
         assert_eq!(index.len(), 2);
     }
 
     #[test]
     fn test_spatiotemporal_query() {
         let mut index = SpatiotemporalIndex::new();
-        index.insert("NYC Jan 1", &Location::new(40.7128, -74.0060), &make_timestamp(1));
-        index.insert("NYC Jan 15", &Location::new(40.7128, -74.0060), &make_timestamp(15));
-        index.insert("LA Jan 1", &Location::new(34.0522, -118.2437), &make_timestamp(1));
-        index.insert("LA Jan 15", &Location::new(34.0522, -118.2437), &make_timestamp(15));
-        
+        index.insert(
+            "NYC Jan 1",
+            &Location::new(40.7128, -74.0060),
+            &make_timestamp(1),
+        );
+        index.insert(
+            "NYC Jan 15",
+            &Location::new(40.7128, -74.0060),
+            &make_timestamp(15),
+        );
+        index.insert(
+            "LA Jan 1",
+            &Location::new(34.0522, -118.2437),
+            &make_timestamp(1),
+        );
+        index.insert(
+            "LA Jan 15",
+            &Location::new(34.0522, -118.2437),
+            &make_timestamp(15),
+        );
+
         // Query: East Coast in first week
         let bounds = GeoBounds::new(35.0, -80.0, 45.0, -70.0);
         let range = TimeRange::new(make_timestamp(1), make_timestamp(7));
-        
+
         let results = index.query(&bounds, &range);
         assert_eq!(results.len(), 1);
         assert_eq!(*results[0], "NYC Jan 1");
@@ -320,23 +351,27 @@ mod tests {
     #[test]
     fn test_heatmap_generation() {
         let mut index: SpatiotemporalIndex<&str> = SpatiotemporalIndex::new();
-        
+
         // Add clustered events
         for i in 0..10 {
-            index.insert("NYC area", 
+            index.insert(
+                "NYC area",
                 &Location::new(40.7 + (i as f64 * 0.01), -74.0 + (i as f64 * 0.01)),
-                &make_timestamp(1));
+                &make_timestamp(1),
+            );
         }
         for i in 0..5 {
-            index.insert("LA area",
+            index.insert(
+                "LA area",
                 &Location::new(34.0 + (i as f64 * 0.01), -118.2 + (i as f64 * 0.01)),
-                &make_timestamp(1));
+                &make_timestamp(1),
+            );
         }
-        
+
         let bounds = GeoBounds::new(30.0, -125.0, 45.0, -70.0);
         let grid = GridSpec::new(bounds, 10, 10);
         let heatmap = index.heatmap(grid);
-        
+
         assert!(heatmap.max_count > 0);
     }
 }

@@ -1,8 +1,8 @@
 //! Timestamp representation with precision awareness.
 
-use chrono::{DateTime, Utc, TimeZone};
-use serde::{Deserialize, Serialize};
 use crate::error::{Error, Result};
+use chrono::{DateTime, TimeZone, Utc};
+use serde::{Deserialize, Serialize};
 
 /// Precision level for timestamps.
 ///
@@ -75,7 +75,10 @@ impl Timestamp {
 
     /// Creates a new timestamp with explicit precision.
     pub fn with_precision(datetime: DateTime<Utc>, precision: TemporalPrecision) -> Self {
-        Self { datetime, precision }
+        Self {
+            datetime,
+            precision,
+        }
     }
 
     /// Creates a timestamp for the current moment.
@@ -105,7 +108,8 @@ impl Timestamp {
         // Try date only (YYYY-MM-DD)
         if s.len() == 10 {
             if let Ok(naive) = chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d") {
-                let dt = naive.and_hms_opt(0, 0, 0)
+                let dt = naive
+                    .and_hms_opt(0, 0, 0)
                     .map(|ndt| Utc.from_utc_datetime(&ndt))
                     .ok_or_else(|| Error::InvalidTimestamp(s.to_string()))?;
                 return Ok(Self::with_precision(dt, TemporalPrecision::Day));
@@ -114,13 +118,16 @@ impl Timestamp {
 
         // Try year-month (YYYY-MM)
         if s.len() == 7 && s.chars().nth(4) == Some('-') {
-            let year: i32 = s[0..4].parse()
+            let year: i32 = s[0..4]
+                .parse()
                 .map_err(|_| Error::InvalidTimestamp(s.to_string()))?;
-            let month: u32 = s[5..7].parse()
+            let month: u32 = s[5..7]
+                .parse()
                 .map_err(|_| Error::InvalidTimestamp(s.to_string()))?;
 
             if let Some(naive) = chrono::NaiveDate::from_ymd_opt(year, month, 1) {
-                let dt = naive.and_hms_opt(0, 0, 0)
+                let dt = naive
+                    .and_hms_opt(0, 0, 0)
                     .map(|ndt| Utc.from_utc_datetime(&ndt))
                     .ok_or_else(|| Error::InvalidTimestamp(s.to_string()))?;
                 return Ok(Self::with_precision(dt, TemporalPrecision::Month));
@@ -129,11 +136,13 @@ impl Timestamp {
 
         // Try year only (YYYY)
         if s.len() == 4 {
-            let year: i32 = s.parse()
+            let year: i32 = s
+                .parse()
                 .map_err(|_| Error::InvalidTimestamp(s.to_string()))?;
 
             if let Some(naive) = chrono::NaiveDate::from_ymd_opt(year, 1, 1) {
-                let dt = naive.and_hms_opt(0, 0, 0)
+                let dt = naive
+                    .and_hms_opt(0, 0, 0)
                     .map(|ndt| Utc.from_utc_datetime(&ndt))
                     .ok_or_else(|| Error::InvalidTimestamp(s.to_string()))?;
                 return Ok(Self::with_precision(dt, TemporalPrecision::Year));
@@ -145,8 +154,7 @@ impl Timestamp {
 
     /// Creates a timestamp from Unix epoch seconds.
     pub fn from_unix(secs: i64) -> Option<Self> {
-        DateTime::from_timestamp(secs, 0)
-            .map(Self::new)
+        DateTime::from_timestamp(secs, 0).map(Self::new)
     }
 
     /// Creates a timestamp from Unix epoch milliseconds.
@@ -183,7 +191,9 @@ impl Timestamp {
             TemporalPrecision::Day => self.datetime.format("%Y-%m-%d").to_string(),
             TemporalPrecision::Hour => self.datetime.format("%Y-%m-%dT%H:00:00Z").to_string(),
             TemporalPrecision::Minute => self.datetime.format("%Y-%m-%dT%H:%M:00Z").to_string(),
-            TemporalPrecision::Second | TemporalPrecision::Millisecond => self.datetime.to_rfc3339(),
+            TemporalPrecision::Second | TemporalPrecision::Millisecond => {
+                self.datetime.to_rfc3339()
+            },
         }
     }
 

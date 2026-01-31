@@ -18,7 +18,7 @@
 //! // Create a spatiotemporal index
 //! let mut index = SpatiotemporalIndex::new();
 //!
-//! index.insert("Event 1", 
+//! index.insert("Event 1",
 //!     &Location::new(40.7128, -74.0060),
 //!     &Timestamp::now());
 //!
@@ -35,9 +35,9 @@
 //! ```
 
 mod spatial;
-mod temporal;
 mod spatiotemporal;
+mod temporal;
 
-pub use spatial::{SpatialIndex, IndexedLocation};
-pub use temporal::{TemporalIndex, SlidingWindowIter};
-pub use spatiotemporal::{SpatiotemporalIndex, GridSpec, Heatmap};
+pub use spatial::{IndexedLocation, SpatialIndex};
+pub use spatiotemporal::{GridSpec, Heatmap, SpatiotemporalIndex};
+pub use temporal::{SlidingWindowIter, TemporalIndex};
