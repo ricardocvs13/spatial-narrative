@@ -243,7 +243,7 @@ impl EventBuilder {
     /// Uses empty string if text is not set.
     pub fn build(self) -> Event {
         Event {
-            id: self.id.unwrap_or_else(EventId::new),
+            id: self.id.unwrap_or_default(),
             location: self.location.unwrap_or_default(),
             timestamp: self.timestamp.unwrap_or_else(Timestamp::now),
             text: self.text.unwrap_or_default(),
@@ -260,7 +260,7 @@ impl EventBuilder {
         let text = self.text.ok_or(Error::MissingField("text"))?;
 
         Ok(Event {
-            id: self.id.unwrap_or_else(EventId::new),
+            id: self.id.unwrap_or_default(),
             location,
             timestamp,
             text,

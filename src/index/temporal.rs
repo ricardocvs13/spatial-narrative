@@ -72,7 +72,7 @@ impl<T: Clone> TemporalIndex<T> {
 
         self.items.push(item);
         self.timestamps.push(timestamp.clone());
-        self.tree.entry(key).or_insert_with(Vec::new).push(idx);
+        self.tree.entry(key).or_default().push(idx);
     }
 
     /// Query items within a time range (inclusive).

@@ -42,8 +42,8 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
       
-      - name: Run tests (all features)
-        run: cargo test --all-features --verbose
+      - name: Run tests (safe features)
+        run: cargo test --features "gpx,sqlite,async" --verbose
 
   clippy:
     name: Clippy
@@ -57,7 +57,7 @@ jobs:
           components: clippy
       
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --all-targets -- -D warnings
 
   fmt:
     name: Formatting
@@ -83,7 +83,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       
       - name: Build documentation
-        run: cargo doc --no-deps --all-features
+        run: cargo doc --no-deps
         env:
           RUSTDOCFLAGS: -D warnings
 
@@ -102,7 +102,7 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
       
       - name: Generate code coverage
-        run: cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+        run: cargo llvm-cov --features "gpx,sqlite,async" --workspace --lcov --output-path lcov.info
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

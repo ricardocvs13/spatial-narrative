@@ -4,7 +4,7 @@ use crate::core::Timestamp;
 use serde::{Deserialize, Serialize};
 
 /// Type of source material.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum SourceType {
     /// News article or blog post.
@@ -24,13 +24,8 @@ pub enum SourceType {
     /// Archive or historical document.
     Archive,
     /// Other/unknown source type.
+    #[default]
     Other,
-}
-
-impl Default for SourceType {
-    fn default() -> Self {
-        Self::Other
-    }
 }
 
 impl std::fmt::Display for SourceType {

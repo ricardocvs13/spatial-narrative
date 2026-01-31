@@ -379,7 +379,7 @@ impl NarrativeBuilder {
     /// Builds the Narrative.
     pub fn build(self) -> Narrative {
         Narrative {
-            id: self.id.unwrap_or_else(NarrativeId::new),
+            id: self.id.unwrap_or_default(),
             title: self.title.unwrap_or_else(|| "Untitled".to_string()),
             events: self.events,
             metadata: self.metadata,

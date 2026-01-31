@@ -22,9 +22,10 @@ impl NodeId {
 }
 
 /// Type of relationship between events.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum EdgeType {
     /// Temporal sequence (A happens before B)
+    #[default]
     Temporal,
     /// Spatial proximity (A and B are geographically close)
     Spatial,
@@ -36,12 +37,6 @@ pub enum EdgeType {
     Reference,
     /// Custom relationship type
     Custom,
-}
-
-impl Default for EdgeType {
-    fn default() -> Self {
-        Self::Temporal
-    }
 }
 
 /// Weight/metadata for an edge in the graph.
