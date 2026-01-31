@@ -1,5 +1,9 @@
 # Spatial Narrative Examples
 
+<div align="center">
+<img src="../assets/logo-light.svg" alt="spatial-narrative logo" width="400">
+</div>
+
 This directory contains runnable examples demonstrating the `spatial-narrative` library.
 
 ## Running Examples
@@ -33,6 +37,9 @@ cargo run --example clustering
 
 # Narrative comparison (similarity metrics)
 cargo run --example comparison
+
+# Text processing (geoparsing, NER, keywords)
+cargo run --example text_processing
 ```
 
 ## Examples Overview
@@ -108,6 +115,16 @@ Demonstrates narrative comparison and similarity:
 
 ---
 
+### `text_processing.rs`
+Demonstrates the text processing capabilities:
+- Geoparsing (coordinate and place name extraction)
+- Named entity recognition (people, organizations, dates)
+- Keyword extraction with TF scoring
+- Text utilities (tokenization, sentence splitting)
+- Geocoding with the built-in gazetteer
+
+---
+
 ## Future Examples (Planned)
 
 ### `graph_analysis.rs` (Planned)
@@ -116,12 +133,11 @@ Will demonstrate:
 - Network analysis (centrality, clustering)
 - Community detection in event networks
 
-### `text_analysis.rs` (Planned)
+### `nlp_advanced.rs` (Planned)
 Will demonstrate:
-- Extracting entities from narrative text
 - Topic modeling across events
 - Sentiment analysis over time and space
-- Named entity recognition for locations and dates
+- Integration with external NLP services
 
 ### `parallel_processing.rs` (Planned)
 Will demonstrate:

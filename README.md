@@ -2,6 +2,15 @@
 
 <div align="center">
 
+<!-- Animated Logo -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jwilliamsresearch/spatial-narrative/master/assets/logo-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/jwilliamsresearch/spatial-narrative/master/assets/logo-light.svg">
+  <img alt="spatial-narrative logo" src="https://raw.githubusercontent.com/jwilliamsresearch/spatial-narrative/master/assets/logo-light.svg" width="500">
+</picture>
+
+<br><br>
+
 [![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg?logo=rust)](https://www.rust-lang.org/)
 [![Crates.io](https://img.shields.io/crates/v/spatial-narrative.svg?logo=rust)](https://crates.io/crates/spatial-narrative)
 [![Downloads](https://img.shields.io/crates/d/spatial-narrative.svg?logo=rust)](https://crates.io/crates/spatial-narrative)
