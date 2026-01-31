@@ -18,6 +18,21 @@ cargo run --example indexing
 
 # Graph building and export (DOT/JSON)
 cargo run --example graph_export
+
+# Spatial analysis (distances, bearings, density)
+cargo run --example spatial_analysis
+
+# Temporal analysis (event rates, gaps, bursts)
+cargo run --example temporal_analysis
+
+# Movement analysis (trajectories, stops, paths)
+cargo run --example movement_analysis
+
+# Clustering (DBSCAN, KMeans)
+cargo run --example clustering
+
+# Narrative comparison (similarity metrics)
+cargo run --example comparison
 ```
 
 ## Examples Overview
@@ -50,6 +65,46 @@ Demonstrates building and exporting narrative graphs:
 - Exporting to **DOT format** (Graphviz) for visualization
 - Exporting to **JSON** for web visualization (D3.js, Cytoscape.js)
 - Graph analysis: roots, leaves, edge types
+
+### `spatial_analysis.rs`
+Demonstrates spatial metrics and calculations:
+- **Haversine distance**: Calculate great-circle distances between points
+- **Bearing calculation**: Compass direction between locations
+- **Destination point**: Find location at distance and bearing from start
+- **SpatialMetrics**: Total distance, bounds, centroid of narratives
+- **Density maps**: Grid-based event density visualization
+
+### `temporal_analysis.rs`
+Demonstrates temporal metrics and patterns:
+- **TemporalMetrics**: Duration, spans, gaps in narratives
+- **Event rate**: Calculate events per time unit
+- **Time binning**: Group events by hour, day, week, month
+- **Gap detection**: Find periods of inactivity
+- **Burst detection**: Identify clusters of rapid activity
+
+### `movement_analysis.rs`
+Demonstrates trajectory and movement pattern analysis:
+- **Trajectory**: Model paths with total distance, duration, speed
+- **Velocity profiles**: Speed over time analysis
+- **Stop detection**: Find stationary periods using configurable thresholds
+- **Movement segments**: Split trajectories at stops
+- **Path simplification**: Douglas-Peucker algorithm for reducing points
+
+### `clustering.rs`
+Demonstrates spatial clustering algorithms:
+- **DBSCAN**: Density-based clustering with eps/min_points parameters
+- **KMeans**: Partition-based clustering with k clusters
+- **Cluster analysis**: Centroids, membership, radius calculation
+- **Parameter sensitivity**: Compare different clustering configurations
+
+### `comparison.rs`
+Demonstrates narrative comparison and similarity:
+- **Spatial similarity**: How much geographic overlap exists
+- **Temporal similarity**: How much time overlap exists
+- **Thematic similarity**: How similar are the event tags/topics
+- **Common locations**: Find shared places between narratives
+- **Weighted comparison**: Custom weights for different dimensions
+- **Set operations**: Spatial intersection and union
 
 ---
 
