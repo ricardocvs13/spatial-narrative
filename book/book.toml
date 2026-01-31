@@ -13,8 +13,8 @@ create-missing = true
 [output.html]
 default-theme = "rust"
 preferred-dark-theme = "ayu"
-git-repository-url = "https://github.com/yourusername/spatial-narrative"
-edit-url-template = "https://github.com/yourusername/spatial-narrative/edit/main/book/{path}"
+git-repository-url = "https://github.com/jwilliamsresearch/spatial-narrative"
+edit-url-template = "https://github.com/jwilliamsresearch/spatial-narrative/edit/main/book/{path}"
 site-url = "/spatial-narrative/"
 cname = ""
 additional-css = ["custom.css"]
