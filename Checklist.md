@@ -231,7 +231,7 @@
 
 ### Documentation
 - [x] Module-level documentation with examples
-- [x] Rustdoc for all public types
+- [x] Rustdoc for all public types.
 - [ ] Graph concepts explanation guide
 
 **Deliverable**: `spatial_narrative::graph` module ✅ (8 tests passing)

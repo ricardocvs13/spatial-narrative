@@ -229,7 +229,7 @@
 ### CLI Tools
 
 - [ ] **sn-parse**: Extract locations from text files
-- [ ] **sn-analyze**: Run analysis from command line
+- [ ] **sn-analyze**: Run analysis from command line.
 - [ ] **sn-convert**: Format conversion utility
 - [ ] **sn-stats**: Generate statistics
 

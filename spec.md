@@ -8,7 +8,7 @@
 
 `spatial-narrative` is a Rust library for representing, analyzing, and working with narratives that unfold across real-world geographic space. Target use cases include journalism, historical research, event documentation, investigative reporting, travel writing, and spatial humanities research.
 
-The library provides zero-copy parsing, efficient spatial indexing, and rich analytical capabilities for understanding how real-world events, movements, and stories develop across geography.
+The library provides zero-copy parsing, efficient spatial indexing, and rich analytical capabilities for understanding how real-world events, movements, and stories develop across geography..
 
 ---
 
