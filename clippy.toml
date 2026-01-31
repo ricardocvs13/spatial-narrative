@@ -1,0 +1,21 @@
+# Clippy configuration for spatial-narrative
+# See: https://doc.rust-lang.org/clippy/configuration.html
+
+# Allow slightly longer functions in this library
+too-many-arguments-threshold = 8
+too-many-lines-threshold = 150
+
+# Type complexity threshold
+type-complexity-threshold = 350
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Documentation requirements
+missing-docs-in-crate-items = true
+
+# Allow certain patterns common in geo/scientific code
+allowed-idents-below-min-chars = ["x", "y", "z", "id", "ts", "dt", "i", "j", "k", "n"]
+
+# MSRV - minimum supported Rust version
+msrv = "1.75.0"

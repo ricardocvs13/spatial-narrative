@@ -3,10 +3,10 @@
 //! This module provides text analysis tools for working with
 //! narrative text, including entity extraction and keyword analysis.
 //!
-//! # Overview
+//! # Planned Features
 //!
-//! - [`TextAnalyzer`] - Named entity recognition
-//! - [`KeywordExtractor`] - Keyword and topic extraction
+//! - `TextAnalyzer` - Named entity recognition
+//! - `KeywordExtractor` - Keyword and topic extraction
 //! - Language detection
 
 // TODO: Phase 6 implementation

@@ -165,6 +165,11 @@ impl Timestamp {
         self.datetime.timestamp_millis()
     }
 
+    /// Returns the Unix timestamp in milliseconds (alias for `unix_timestamp_millis`).
+    pub fn to_unix_millis(&self) -> i64 {
+        self.datetime.timestamp_millis()
+    }
+
     /// Formats the timestamp as an ISO 8601 string.
     pub fn to_rfc3339(&self) -> String {
         self.datetime.to_rfc3339()

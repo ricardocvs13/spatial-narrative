@@ -3,10 +3,10 @@
 //! This module provides geoparsing capabilities for extracting
 //! location mentions from text and resolving them to coordinates.
 //!
-//! # Overview
+//! # Planned Features
 //!
-//! - [`GeoParser`] - Main geoparser interface
-//! - [`LocationMention`] - Extracted location reference
-//! - [`Gazetteer`] - Place name database
+//! - `GeoParser` - Main geoparser interface
+//! - `LocationMention` - Extracted location reference
+//! - `Gazetteer` - Place name database
 
 // TODO: Phase 6 implementation

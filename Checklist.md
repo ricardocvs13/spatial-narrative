@@ -4,12 +4,13 @@
 
 - [x] Initialize Rust project with `cargo new spatial-narrative --lib`
 - [x] Configure Cargo.toml with dependencies and features
-- [ ] Set up CI/CD pipeline (GitHub Actions)
-- [ ] Configure code formatting (`rustfmt.toml`)
-- [ ] Configure linting (`clippy.toml`)
+- [x] Set up CI/CD pipeline (GitHub Actions)
+- [x] Configure code formatting (`rustfmt.toml`)
+- [x] Configure linting (`clippy.toml`)
 - [x] Create module structure skeleton
 - [x] Set up benchmark harness with `criterion` (configured in Cargo.toml)
 - [x] Set up property-based testing with `proptest` (added to dev-dependencies)
+- [x] Create examples folder with demos
 
 ---
 
@@ -128,31 +129,33 @@
 **Goal**: Efficient spatial queries
 
 ### Spatial Index (R-tree)
-- [ ] Integrate `rstar` crate
-- [ ] Implement `SpatialIndex<T>` struct
-- [ ] Implement `IndexedItem<T>` wrapper for R-tree
-- [ ] `query_bbox()` - bounding box queries
-- [ ] `query_radius()` - radius queries (meters)
-- [ ] `nearest()` - k-nearest neighbors
-- [ ] `query_predicate()` - custom predicate filtering
-- [ ] `insert()` - add items to index
-- [ ] `remove()` - remove items from index
-- [ ] `bulk_load()` - efficient batch insertion
+- [x] Integrate `rstar` crate
+- [x] Implement `SpatialIndex<T>` struct
+- [x] Implement `IndexedLocation` wrapper for R-tree
+- [x] `query_bbox()` - bounding box queries
+- [x] `query_radius()` - radius queries (degrees approximation)
+- [x] `nearest()` - k-nearest neighbors
+- [x] `query_bounds()` - GeoBounds queries
+- [x] `insert()` - add items to index
+- [ ] `remove()` - remove items from index (deferred)
+- [x] `from_iter()` - efficient batch insertion
 
 ### Temporal Index (B-tree)
-- [ ] Implement `TemporalIndex<T>` struct
-- [ ] Implement `IndexEntry<T>` wrapper
-- [ ] `query_range()` - time range queries
-- [ ] `before()` - events before timestamp
-- [ ] `after()` - events after timestamp
-- [ ] `sliding_window()` - sliding window iterator
+- [x] Implement `TemporalIndex<T>` struct
+- [x] `query_range()` - time range queries
+- [x] `before()` - events before timestamp
+- [x] `after()` - events after timestamp
+- [x] `first()` / `last()` - earliest/latest events
+- [x] `chronological()` - iterator in time order
+- [x] `time_range()` - get overall time range
 
 ### Spatiotemporal Index
-- [ ] Implement `SpatiotemporalIndex<T>` struct
-- [ ] Combined space + time queries
-- [ ] `heatmap()` - efficient heatmap generation
-- [ ] Implement `GridSpec` for heatmap configuration
-- [ ] Implement `Heatmap` result type
+- [x] Implement `SpatiotemporalIndex<T>` struct
+- [x] Combined space + time queries
+- [x] `heatmap()` - efficient heatmap generation
+- [x] Implement `GridSpec` for heatmap configuration
+- [x] Implement `Heatmap` result type
+- [x] `nearest_in_range()` - k-nearest within time range
 
 ### Performance
 - [ ] Benchmark spatial queries vs naive iteration
@@ -161,18 +164,19 @@
 - [ ] Memory usage profiling
 
 ### Testing
-- [ ] Unit tests for spatial index operations
-- [ ] Unit tests for temporal index operations
-- [ ] Unit tests for combined queries
+- [x] Unit tests for spatial index operations
+- [x] Unit tests for temporal index operations
+- [x] Unit tests for combined queries
+- [x] Unit tests for heatmap generation
 - [ ] Property-based tests for query correctness
 - [ ] Benchmark tests with criterion
 
 ### Documentation
-- [ ] When to use indexes (guidance)
-- [ ] Performance characteristics
-- [ ] Examples for common query patterns
+- [x] Module-level documentation with examples
+- [x] Doc examples for all index types
+- [ ] Performance characteristics guide
 
-**Deliverable**: `spatial_narrative::index` module with benchmarks
+**Deliverable**: `spatial_narrative::index` module ✅ (12 tests passing)
 
 ---
 
@@ -181,49 +185,56 @@
 **Goal**: Represent narratives as graphs
 
 ### Graph Types
-- [ ] Integrate `petgraph` crate
-- [ ] Implement `EventNode` struct
-- [ ] Implement `NodeMetadata` struct
-- [ ] Implement `EventEdge` struct
-- [ ] Implement `EdgeMetadata` struct
-- [ ] Implement `EdgeType` enum (Temporal, Spatial, Causal, Thematic, Source)
-- [ ] Implement `NarrativeGraph` struct
+- [x] Integrate `petgraph` crate
+- [x] Implement `NodeId` struct for node references
+- [x] Implement `EdgeType` enum (Temporal, Spatial, Causal, Thematic, Reference, Custom)
+- [x] Implement `EdgeWeight` struct with type and weight
+- [x] Implement `NarrativeGraph` struct
 
 ### Connection Rules
-- [ ] Implement `ConnectionRule` enum
-- [ ] `TemporalProximity` rule (max time gap)
-- [ ] `SpatialProximity` rule (max distance)
-- [ ] `SharedTags` rule (tag overlap)
-- [ ] `Custom` rule (user-defined predicate)
+- [x] `connect_temporal()` - temporal sequence connections
+- [x] `connect_spatial()` - spatial proximity connections (configurable distance)
+- [x] `connect_thematic()` - shared tags connections
+- [ ] Custom predicate connections (deferred)
 
 ### Graph Construction
-- [ ] `from_narrative()` - build graph from events
-- [ ] Apply connection rules during construction
-- [ ] Index integration for efficient rule evaluation
+- [x] `from_events()` - build graph from events
+- [x] `add_event()` - add individual events
+- [x] `connect()` / `connect_weighted()` - manual edge creation
 
 ### Graph Operations
-- [ ] `path()` - find path between events
-- [ ] `subgraph()` - extract by region/time
-- [ ] `communities()` - community detection
-- [ ] `critical_path()` - critical path analysis
+- [x] `shortest_path()` - find path between events (Dijkstra)
+- [x] `has_path()` - check connectivity
+- [x] `subgraph_temporal()` - extract by time range
+- [x] `subgraph_spatial()` - extract by geographic bounds
+- [x] `successors()` / `predecessors()` - get neighbors
+- [x] `roots()` / `leaves()` - find entry/exit points
+- [x] `in_degree()` / `out_degree()` - node connectivity
+- [x] `edges_of_type()` - filter edges by type
+- [ ] `communities()` - community detection (deferred)
+- [ ] `critical_path()` - critical path analysis (deferred)
 
 ### Graph Export
-- [ ] DOT format export for visualization
-- [ ] JSON export of graph structure
+- [x] DOT format export for visualization (`to_dot()`, `to_dot_with_options()`)
+- [x] JSON export of graph structure (`to_json()`, `to_json_pretty()`)
+- [x] `DotOptions` for customizing DOT output
+- [x] Node coloring by connectivity (roots, leaves, hubs)
 
 ### Testing
-- [ ] Unit tests for graph construction
-- [ ] Unit tests for each connection rule
-- [ ] Unit tests for path finding
-- [ ] Unit tests for community detection
+- [x] Unit tests for graph construction
+- [x] Unit tests for temporal connections
+- [x] Unit tests for thematic connections
+- [x] Unit tests for path finding
+- [x] Unit tests for roots/leaves detection
+- [x] Unit tests for haversine distance
 - [ ] Integration tests with sample narratives
 
 ### Documentation
-- [ ] Graph concepts explanation
-- [ ] Connection rule documentation
-- [ ] Visualization examples
+- [x] Module-level documentation with examples
+- [x] Rustdoc for all public types
+- [ ] Graph concepts explanation guide
 
-**Deliverable**: `spatial_narrative::graph` module with examples
+**Deliverable**: `spatial_narrative::graph` module ✅ (8 tests passing)
 
 ---
 

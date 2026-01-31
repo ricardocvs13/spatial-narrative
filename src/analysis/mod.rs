@@ -4,11 +4,11 @@
 //! including spatial metrics, temporal metrics, clustering,
 //! and movement analysis.
 //!
-//! # Overview
+//! # Planned Features
 //!
-//! - [`SpatialMetrics`] - Geographic extent, distance, dispersion
-//! - [`TemporalMetrics`] - Duration, event rate, gaps
-//! - [`MovementAnalyzer`] - Trajectory extraction and analysis
-//! - [`SpatialClustering`] - DBSCAN, k-means clustering
+//! - `SpatialMetrics` - Geographic extent, distance, dispersion
+//! - `TemporalMetrics` - Duration, event rate, gaps
+//! - `MovementAnalyzer` - Trajectory extraction and analysis
+//! - `SpatialClustering` - DBSCAN, k-means clustering
 
 // TODO: Phase 5 implementation
