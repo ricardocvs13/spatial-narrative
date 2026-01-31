@@ -2006,6 +2006,7 @@ dependencies = [
  "geo",
  "geo-types",
  "gpx",
+ "once_cell",
  "petgraph",
  "proj",
  "proptest",

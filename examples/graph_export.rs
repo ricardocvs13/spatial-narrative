@@ -37,7 +37,7 @@ fn main() {
     // Default DOT format
     let dot = graph.to_dot();
     println!("Default DOT output (first 500 chars):");
-    println!("{}\n", &dot[..dot.len().min(500)]);
+    println!("{}\n", &dot[..dot.len()]);
 
     // Timeline layout (left-to-right)
     let timeline_dot = graph.to_dot_with_options(DotOptions::timeline());

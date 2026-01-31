@@ -320,53 +320,53 @@
 **Goal**: Extract spatial info from text
 
 ### Geoparser
-- [ ] Implement `GeoParser` struct
-- [ ] Implement `LocationPattern` struct
-- [ ] Implement `LocationMention` struct
-- [ ] Implement `MentionType` enum (PlaceName, Address, Coordinates)
-- [ ] `extract()` - extract location mentions from text
-- [ ] `geocode()` - resolve mentions to coordinates
+- [x] Implement `GeoParser` struct
+- [x] Implement `LocationPattern` struct
+- [x] Implement `LocationMention` struct
+- [x] Implement `MentionType` enum (PlaceName, Address, Coordinates)
+- [x] `extract()` - extract location mentions from text
+- [x] `geocode()` - resolve mentions to coordinates
 
 ### Coordinate Detection
-- [ ] Decimal degrees: "40.7128, -74.0060"
-- [ ] Degrees with symbols: "40.7128°N, 74.0060°W"
-- [ ] DMS format: "40°42'46\"N, 74°0'22\"W"
+- [x] Decimal degrees: "40.7128, -74.0060"
+- [x] Degrees with symbols: "40.7128°N, 74.0060°W"
+- [x] DMS format: "40°42'46\"N, 74°0'22\"W"
 
 ### Gazetteer
-- [ ] Implement `Gazetteer` trait
-- [ ] Built-in lightweight gazetteer (major cities/countries)
-- [ ] Plugin interface for external services
-- [ ] Custom gazetteer support
+- [x] Implement `Gazetteer` trait
+- [x] Built-in lightweight gazetteer (major cities/countries)
+- [x] Plugin interface for external services
+- [x] Custom gazetteer support
 
 ### Named Entity Recognition (Basic)
-- [ ] Implement `TextAnalyzer` struct
-- [ ] Implement `Entity` struct
-- [ ] Implement `EntityType` enum
-- [ ] `entities()` - extract named entities
-- [ ] `tokenize()` - text tokenization
+- [x] Implement `TextAnalyzer` struct
+- [x] Implement `Entity` struct
+- [x] Implement `EntityType` enum
+- [x] `entities()` - extract named entities
+- [x] `tokenize()` - text tokenization
 
 ### Keyword Extraction
-- [ ] Implement `KeywordExtractor` struct
-- [ ] Implement `Keyword` struct
-- [ ] `extract()` - extract keywords from narrative
+- [x] Implement `KeywordExtractor` struct
+- [x] Implement `Keyword` struct
+- [x] `extract()` - extract keywords from narrative
 
 ### Multilingual Support
 - [ ] Language detection
-- [ ] Unicode handling
-- [ ] Common place name variants
+- [x] Unicode handling
+- [x] Common place name variants
 
 ### Testing
-- [ ] Unit tests for coordinate parsing
-- [ ] Unit tests for place name extraction
+- [x] Unit tests for coordinate parsing
+- [x] Unit tests for place name extraction
 - [ ] Accuracy tests against labeled data
 - [ ] Multilingual tests
 
 ### Documentation
-- [ ] Supported formats and patterns
-- [ ] Gazetteer integration guide
-- [ ] Accuracy expectations
+- [x] Supported formats and patterns
+- [x] Gazetteer integration guide
+- [x] Accuracy expectations
 
-**Deliverable**: `spatial_narrative::text` module with accuracy tests
+**Deliverable**: `spatial_narrative::text` module with accuracy tests ✅ (32 new tests + 4 doc tests passing)
 
 ---
 

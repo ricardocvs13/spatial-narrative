@@ -12,6 +12,7 @@
 //! - Graph-based analysis of event relationships
 //! - Clustering and pattern detection
 //! - Import/export in standard formats (GeoJSON, CSV, GPX)
+//! - Text processing and geoparsing
 //!
 //! ## Quick Start
 //!
@@ -44,7 +45,7 @@
 //! - [`analysis`] - Metrics, clustering, and movement analysis
 //! - [`io`] - Import/export in various formats
 //! - [`transform`] - Coordinate transformations and projections
-//! - [`parser`] - Extract locations from unstructured text
+//! - [`parser`] - Extract locations from unstructured text (geoparsing)
 //! - [`text`] - Natural language processing utilities
 
 pub mod analysis;
@@ -67,6 +68,12 @@ pub mod prelude {
         TemporalEntity, TemporalPrecision, TimeRange, Timestamp,
     };
     pub use crate::error::{Error, Result};
+
+    // Re-export commonly used parser types
+    pub use crate::parser::{BuiltinGazetteer, Gazetteer, GeoParser, LocationMention, MentionType};
+
+    // Re-export commonly used text types
+    pub use crate::text::{Entity, EntityType, Keyword, KeywordExtractor, TextAnalyzer};
 }
 
 pub use error::{Error, Result};
