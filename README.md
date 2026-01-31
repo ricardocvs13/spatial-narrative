@@ -1,10 +1,25 @@
 # spatial-narrative
 
-[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg)](https://www.rust-lang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-rustdoc-green.svg)](https://docs.rs/spatial-narrative)
+<div align="center">
 
-A Rust library for modeling, indexing, analyzing, and transforming **spatial narratives** — sequences of events anchored in both space and time.
+[![Rust](https://img.shields.io/badge/rust-1.70%2B-orange.svg?logo=rust)](https://www.rust-lang.org/)
+[![Crates.io](https://img.shields.io/crates/v/spatial-narrative.svg?logo=rust)](https://crates.io/crates/spatial-narrative)
+[![Downloads](https://img.shields.io/crates/d/spatial-narrative.svg?logo=rust)](https://crates.io/crates/spatial-narrative)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-rustdoc-green.svg?logo=docsdotrs)](https://docs.rs/spatial-narrative)
+[![CI](https://img.shields.io/github/actions/workflow/status/yourusername/spatial-narrative/ci.yml?branch=main&logo=github)](https://github.com/yourusername/spatial-narrative/actions)
+[![codecov](https://img.shields.io/codecov/c/github/yourusername/spatial-narrative?logo=codecov)](https://codecov.io/gh/yourusername/spatial-narrative)
+
+[![GitHub stars](https://img.shields.io/github/stars/yourusername/spatial-narrative?style=social)](https://github.com/yourusername/spatial-narrative)
+[![GitHub forks](https://img.shields.io/github/forks/yourusername/spatial-narrative?style=social)](https://github.com/yourusername/spatial-narrative/fork)
+
+**A Rust library for modeling, indexing, analyzing, and transforming spatial narratives — sequences of events anchored in both space and time.**
+
+[📖 Documentation](https://docs.rs/spatial-narrative) · [🚀 Getting Started](#quick-start) · [📦 Crates.io](https://crates.io/crates/spatial-narrative) · [💬 Discussions](https://github.com/yourusername/spatial-narrative/discussions)
+
+</div>
+
+---
 
 ## Overview
 

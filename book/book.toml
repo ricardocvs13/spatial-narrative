@@ -1,0 +1,48 @@
+[book]
+title = "Spatial Narrative Documentation"
+authors = ["James Williams"]
+description = "A Rust library for modeling, indexing, and analyzing spatial narratives"
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "../docs"
+create-missing = true
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "ayu"
+git-repository-url = "https://github.com/yourusername/spatial-narrative"
+edit-url-template = "https://github.com/yourusername/spatial-narrative/edit/main/book/{path}"
+site-url = "/spatial-narrative/"
+cname = ""
+additional-css = ["custom.css"]
+additional-js = []
+no-section-label = false
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.playground]
+editable = true
+copyable = true
+copy-js = true
+runnable = false
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-hierarchical-headings = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3
+copy-js = true
+
+[preprocessor.links]
+
+[preprocessor.index]

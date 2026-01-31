@@ -1,0 +1,99 @@
+/* Custom styles for spatial-narrative documentation */
+
+/* Header styling */
+.sidebar .sidebar-scrollbox {
+    padding-top: 10px;
+}
+
+/* Code block styling */
+pre {
+    border-radius: 6px;
+}
+
+/* Table styling */
+table {
+    margin: 1em 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 8px 12px;
+    border: 1px solid var(--table-border-color);
+}
+
+th {
+    background-color: var(--table-header-bg);
+    font-weight: 600;
+}
+
+/* Warning/info boxes */
+.warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 1em;
+    margin: 1em 0;
+}
+
+.warning code {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode warning */
+.ayu .warning,
+.navy .warning,
+.coal .warning {
+    background-color: #332701;
+    border-color: #664d00;
+}
+
+/* Feature badges */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.badge-complete {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-planned {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Status emoji styling */
+.status-complete::before {
+    content: "✅ ";
+}
+
+.status-planned::before {
+    content: "🚧 ";
+}
+
+/* Improve heading anchors */
+h1 a.header,
+h2 a.header,
+h3 a.header {
+    color: inherit;
+}
+
+/* Better inline code */
+:not(pre) > code {
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Module structure diagram */
+.module-diagram {
+    font-family: monospace;
+    background-color: var(--code-bg);
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+}

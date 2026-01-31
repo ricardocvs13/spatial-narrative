@@ -1,11 +1,11 @@
 [package]
 name = "spatial-narrative"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
 description = "A Rust library for representing, analyzing, and working with narratives that unfold across real-world geographic space"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/yourusername/spatial-narrative"
+license = "MIT"
+repository = "https://github.com/jwilliamsresearch/spatial-narrative"
 documentation = "https://docs.rs/spatial-narrative"
 readme = "README.md"
 keywords = ["geospatial", "narrative", "geography", "gis", "analysis"]
