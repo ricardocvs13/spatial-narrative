@@ -90,4 +90,6 @@ pub use keywords::{Keyword, KeywordExtractor};
 pub use ml_ner::{init_ort, MlEntity, MlNerModel, MlNerResult, NerModel};
 
 #[cfg(feature = "ml-ner-download")]
-pub use ml_ner::{cache_size_bytes, clear_model_cache, is_model_cached, model_cache_dir, model_cache_path};
+pub use ml_ner::{
+    cache_size_bytes, clear_model_cache, is_model_cached, model_cache_dir, model_cache_path,
+};

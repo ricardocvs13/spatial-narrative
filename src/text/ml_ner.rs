@@ -136,7 +136,7 @@ impl NerModel {
         match self {
             Self::DistilBertQuantized => {
                 "onnx-community/distilbert-base-cased-finetuned-conll03-english-ONNX"
-            }
+            },
             Self::DistilBert => "dslim/distilbert-NER",
             Self::BertBase => "dslim/bert-base-NER",
             Self::BertLarge => "dslim/bert-large-NER",
@@ -178,11 +178,7 @@ impl NerModel {
     pub fn required_files(&self) -> Vec<&'static str> {
         if self.is_onnx_native() {
             // ONNX-native models have quantized version
-            vec![
-                "onnx/model_quantized.onnx",
-                "tokenizer.json",
-                "config.json",
-            ]
+            vec!["onnx/model_quantized.onnx", "tokenizer.json", "config.json"]
         } else {
             // Other models need ONNX export (handled separately)
             vec!["tokenizer.json", "config.json"]
@@ -244,13 +240,13 @@ pub fn clear_model_cache(model: Option<&NerModel>) -> std::io::Result<()> {
             if path.exists() {
                 std::fs::remove_dir_all(path)?;
             }
-        }
+        },
         None => {
             let cache_dir = model_cache_dir();
             if cache_dir.exists() {
                 std::fs::remove_dir_all(cache_dir)?;
             }
-        }
+        },
     }
     Ok(())
 }
@@ -512,11 +508,9 @@ impl MlNerModel {
     {
         // Use the sync API in a blocking task - more reliable than tokio API
         let model_clone = model.clone();
-        tokio::task::spawn_blocking(move || {
-            Self::download_sync_impl(model_clone, progress)
-        })
-        .await
-        .map_err(|e| Error::ParseError(format!("Download task failed: {}", e)))?
+        tokio::task::spawn_blocking(move || Self::download_sync_impl(model_clone, progress))
+            .await
+            .map_err(|e| Error::ParseError(format!("Download task failed: {}", e)))?
     }
 
     #[cfg(feature = "ml-ner-download")]
@@ -536,13 +530,13 @@ impl MlNerModel {
         }
 
         // Create cache directory
-        std::fs::create_dir_all(&cache_dir).map_err(|e| {
-            Error::ParseError(format!("Failed to create cache directory: {}", e))
-        })?;
+        std::fs::create_dir_all(&cache_dir)
+            .map_err(|e| Error::ParseError(format!("Failed to create cache directory: {}", e)))?;
 
         // Initialize HuggingFace Hub API (sync version)
-        let api = Api::new()
-            .map_err(|e| Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e)))?;
+        let api = Api::new().map_err(|e| {
+            Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e))
+        })?;
 
         let repo = api.model(model.repo_id().to_string());
 
@@ -555,16 +549,19 @@ impl MlNerModel {
                 .map_err(|e| Error::ParseError(format!("Failed to download model: {}", e)))?;
 
             // Copy to our cache directory
-            std::fs::copy(&onnx_path, cache_dir.join("model.onnx")).map_err(|e| {
-                Error::ParseError(format!("Failed to copy model to cache: {}", e))
-            })?;
+            std::fs::copy(&onnx_path, cache_dir.join("model.onnx"))
+                .map_err(|e| Error::ParseError(format!("Failed to copy model to cache: {}", e)))?;
 
-            progress(model.download_size_mb() * 1024 * 1024 / 2, model.download_size_mb() * 1024 * 1024);
+            progress(
+                model.download_size_mb() * 1024 * 1024 / 2,
+                model.download_size_mb() * 1024 * 1024,
+            );
 
             // Download tokenizer - create fresh API/repo to avoid caching issues
             println!("Downloading tokenizer...");
-            let api2 = Api::new()
-                .map_err(|e| Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e)))?;
+            let api2 = Api::new().map_err(|e| {
+                Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e))
+            })?;
             let repo2 = api2.model(model.repo_id().to_string());
 
             let tokenizer_path = repo2
@@ -580,7 +577,10 @@ impl MlNerModel {
                 let _ = std::fs::copy(&config_path, cache_dir.join("config.json"));
             }
 
-            progress(model.download_size_mb() * 1024 * 1024, model.download_size_mb() * 1024 * 1024);
+            progress(
+                model.download_size_mb() * 1024 * 1024,
+                model.download_size_mb() * 1024 * 1024,
+            );
         } else {
             // For non-ONNX models (like dslim/bert-base-NER), they need ONNX export
             let onnx_result = repo.get("model.onnx");
@@ -590,7 +590,7 @@ impl MlNerModel {
                     std::fs::copy(&path, cache_dir.join("model.onnx")).map_err(|e| {
                         Error::ParseError(format!("Failed to copy model to cache: {}", e))
                     })?;
-                }
+                },
                 Err(_) => {
                     // Clean up partial download
                     let _ = std::fs::remove_dir_all(&cache_dir);
@@ -609,12 +609,13 @@ impl MlNerModel {
                         model,
                         model.repo_id()
                     )));
-                }
+                },
             }
 
             // Download tokenizer
-            let api2 = Api::new()
-                .map_err(|e| Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e)))?;
+            let api2 = Api::new().map_err(|e| {
+                Error::ParseError(format!("Failed to initialize HuggingFace API: {}", e))
+            })?;
             let repo2 = api2.model(model.repo_id().to_string());
 
             let tokenizer_path = repo2

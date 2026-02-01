@@ -66,7 +66,7 @@ fn main() {
         Ok(Err(e)) => {
             eprintln!("\nError: {}", e);
             return;
-        }
+        },
         Err(_panic) => {
             // Panic occurred - likely ONNX Runtime not found
             println!("\n");
@@ -86,7 +86,9 @@ fn main() {
             println!();
             println!("  Option 2: macOS with Homebrew");
             println!("    brew install onnxruntime");
-            println!("    export ORT_DYLIB_PATH=$(brew --prefix onnxruntime)/lib/libonnxruntime.dylib");
+            println!(
+                "    export ORT_DYLIB_PATH=$(brew --prefix onnxruntime)/lib/libonnxruntime.dylib"
+            );
             println!();
             println!("  Option 3: Linux");
             println!("    # Ubuntu/Debian");
@@ -94,7 +96,7 @@ fn main() {
             println!("    export ORT_DYLIB_PATH=/usr/lib/libonnxruntime.so");
             println!();
             return;
-        }
+        },
     };
 
     println!("\nModel loaded successfully!\n");
@@ -125,10 +127,10 @@ fn main() {
                     }
                     println!();
                 }
-            }
+            },
             Err(e) => {
                 println!("  Error: {}\n", e);
-            }
+            },
         }
     }
 
