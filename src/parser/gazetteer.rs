@@ -1,7 +1,29 @@
 //! Gazetteer trait and built-in implementation for place name resolution.
+//!
+//! This module provides multiple gazetteer implementations for resolving place names to coordinates:
+//!
+//! - [`BuiltinGazetteer`]: Built-in database with 200+ major world locations
+//! - [`GazetteerNominatim`]: OpenStreetMap Nominatim API (requires `geocoding` feature)
+//! - [`GazetteerGeoNames`]: GeoNames web service (requires `geocoding` feature)
+//! - [`GazetteerWikidata`]: Wikidata SPARQL query service (requires `geocoding` feature)
+//! - [`MultiGazetteer`]: Combines multiple gazetteers with fallback
+//!
+//! # Example
+//!
+//! ```rust
+//! use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer};
+//!
+//! let gaz = BuiltinGazetteer::new();
+//! if let Some(loc) = gaz.lookup("Paris") {
+//!     println!("Paris: {}, {}", loc.lat, loc.lon);
+//! }
+//! ```
 
 use crate::core::Location;
 use std::collections::HashMap;
+
+#[cfg(feature = "geocoding")]
+use serde::Deserialize;
 
 /// Trait for place name resolution (gazetteer).
 ///
@@ -46,6 +68,398 @@ pub trait Gazetteer: Send + Sync {
     /// Get aliases for a place name (e.g., "NYC" → "New York City").
     fn aliases(&self, _name: &str) -> Vec<&str> {
         Vec::new()
+    }
+}
+
+#[cfg(feature = "geocoding")]
+/// Gazetteer that queries OSM Nominatim API.
+///
+/// Uses the public Nominatim API at `https://nominatim.openstreetmap.org`.
+/// Please respect the [usage policy](https://operations.osmfoundation.org/policies/nominatim/).
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use spatial_narrative::parser::{GazetteerNominatim, Gazetteer};
+///
+/// let gaz = GazetteerNominatim::new();
+/// if let Some(loc) = gaz.lookup("Berlin") {
+///     println!("Berlin: {}, {}", loc.lat, loc.lon);
+/// }
+/// ```
+pub struct GazetteerNominatim {
+    base_url: String,
+    user_agent: String,
+}
+
+#[cfg(feature = "geocoding")]
+impl GazetteerNominatim {
+    /// Create a new Nominatim gazetteer with default settings.
+    pub fn new() -> Self {
+        Self {
+            base_url: "https://nominatim.openstreetmap.org".to_string(),
+            user_agent: "spatial-narrative/0.1.0".to_string(),
+        }
+    }
+
+    /// Create a Nominatim gazetteer with custom base URL (for self-hosted instances).
+    pub fn with_base_url(base_url: impl Into<String>) -> Self {
+        Self {
+            base_url: base_url.into(),
+            user_agent: "spatial-narrative/0.1.0".to_string(),
+        }
+    }
+
+    /// Set a custom user agent (recommended for production use).
+    pub fn with_user_agent(mut self, user_agent: impl Into<String>) -> Self {
+        self.user_agent = user_agent.into();
+        self
+    }
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+struct NominatimResponse {
+    lat: String,
+    lon: String,
+    display_name: Option<String>,
+}
+
+#[cfg(feature = "geocoding")]
+impl Gazetteer for GazetteerNominatim {
+    fn lookup(&self, name: &str) -> Option<Location> {
+        let url = format!(
+            "{}/search?q={}&format=json&limit=1",
+            self.base_url,
+            urlencoding::encode(name)
+        );
+
+        let client = reqwest::blocking::Client::new();
+        let response = client
+            .get(&url)
+            .header("User-Agent", &self.user_agent)
+            .send()
+            .ok()?;
+
+        let results: Vec<NominatimResponse> = response.json().ok()?;
+        let result = results.first()?;
+
+        let lat: f64 = result.lat.parse().ok()?;
+        let lon: f64 = result.lon.parse().ok()?;
+
+        Some(Location::new(lat, lon))
+    }
+
+    fn contains(&self, name: &str) -> bool {
+        self.lookup(name).is_some()
+    }
+
+    fn all_names(&self) -> Vec<&str> {
+        vec![] // Not applicable for API-based gazetteers
+    }
+}
+
+#[cfg(not(feature = "geocoding"))]
+/// Gazetteer that queries OSM Nominatim API (requires `geocoding` feature).
+pub struct GazetteerNominatim;
+
+#[cfg(not(feature = "geocoding"))]
+impl Gazetteer for GazetteerNominatim {
+    fn lookup(&self, _name: &str) -> Option<Location> {
+        None
+    }
+    fn contains(&self, _name: &str) -> bool {
+        false
+    }
+    fn all_names(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+#[cfg(feature = "geocoding")]
+/// Gazetteer that queries GeoNames API.
+///
+/// Requires a GeoNames username (free registration at https://www.geonames.org/login).
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use spatial_narrative::parser::{GazetteerGeoNames, Gazetteer};
+///
+/// let gaz = GazetteerGeoNames::new("your_username");
+/// if let Some(loc) = gaz.lookup("Tokyo") {
+///     println!("Tokyo: {}, {}", loc.lat, loc.lon);
+/// }
+/// ```
+pub struct GazetteerGeoNames {
+    username: String,
+}
+
+#[cfg(feature = "geocoding")]
+impl GazetteerGeoNames {
+    /// Create a new GeoNames gazetteer with your username.
+    pub fn new(username: impl Into<String>) -> Self {
+        Self {
+            username: username.into(),
+        }
+    }
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+struct GeoNamesResponse {
+    geonames: Vec<GeoNamesEntry>,
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+#[allow(dead_code)]
+struct GeoNamesEntry {
+    lat: String,
+    lng: String,
+    name: String,
+}
+
+#[cfg(feature = "geocoding")]
+impl Gazetteer for GazetteerGeoNames {
+    fn lookup(&self, name: &str) -> Option<Location> {
+        let url = format!(
+            "http://api.geonames.org/searchJSON?q={}&maxRows=1&username={}",
+            urlencoding::encode(name),
+            urlencoding::encode(&self.username)
+        );
+
+        let client = reqwest::blocking::Client::new();
+        let response = client.get(&url).send().ok()?;
+        let data: GeoNamesResponse = response.json().ok()?;
+        let entry = data.geonames.first()?;
+
+        let lat: f64 = entry.lat.parse().ok()?;
+        let lon: f64 = entry.lng.parse().ok()?;
+
+        Some(Location::new(lat, lon))
+    }
+
+    fn contains(&self, name: &str) -> bool {
+        self.lookup(name).is_some()
+    }
+
+    fn all_names(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+#[cfg(not(feature = "geocoding"))]
+/// Gazetteer that queries GeoNames API (requires `geocoding` feature).
+pub struct GazetteerGeoNames;
+
+#[cfg(not(feature = "geocoding"))]
+impl Gazetteer for GazetteerGeoNames {
+    fn lookup(&self, _name: &str) -> Option<Location> {
+        None
+    }
+    fn contains(&self, _name: &str) -> bool {
+        false
+    }
+    fn all_names(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+#[cfg(feature = "geocoding")]
+/// Gazetteer that queries Wikidata SPARQL endpoint.
+///
+/// Uses the Wikidata Query Service to find geographic coordinates for place names.
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use spatial_narrative::parser::{GazetteerWikidata, Gazetteer};
+///
+/// let gaz = GazetteerWikidata::new();
+/// if let Some(loc) = gaz.lookup("London") {
+///     println!("London: {}, {}", loc.lat, loc.lon);
+/// }
+/// ```
+pub struct GazetteerWikidata {
+    endpoint: String,
+}
+
+#[cfg(feature = "geocoding")]
+impl GazetteerWikidata {
+    /// Create a new Wikidata gazetteer.
+    pub fn new() -> Self {
+        Self {
+            endpoint: "https://query.wikidata.org/sparql".to_string(),
+        }
+    }
+
+    fn build_query(name: &str) -> String {
+        format!(
+            r#"
+SELECT ?place ?placeLabel ?coord WHERE {{
+  ?place rdfs:label "{}"@en.
+  ?place wdt:P625 ?coord.
+  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
+}}
+LIMIT 1
+"#,
+            name.replace('"', r#"\""#)
+        )
+    }
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+struct WikidataResponse {
+    results: WikidataResults,
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+struct WikidataResults {
+    bindings: Vec<WikidataBinding>,
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+struct WikidataBinding {
+    coord: WikidataValue,
+}
+
+#[cfg(feature = "geocoding")]
+#[derive(Debug, Deserialize)]
+struct WikidataValue {
+    value: String,
+}
+
+#[cfg(feature = "geocoding")]
+impl Gazetteer for GazetteerWikidata {
+    fn lookup(&self, name: &str) -> Option<Location> {
+        let query = Self::build_query(name);
+        let client = reqwest::blocking::Client::new();
+
+        let response = client
+            .get(&self.endpoint)
+            .query(&[("query", query)])
+            .header("User-Agent", "spatial-narrative/0.1.0")
+            .header("Accept", "application/sparql-results+json")
+            .send()
+            .ok()?;
+
+        let data: WikidataResponse = response.json().ok()?;
+        let binding = data.results.bindings.first()?;
+
+        // Parse "Point(lon lat)" format
+        let coord_str = &binding.coord.value;
+        if let Some(point_data) = coord_str.strip_prefix("Point(").and_then(|s| s.strip_suffix(")"))
+        {
+            let parts: Vec<&str> = point_data.split_whitespace().collect();
+            if parts.len() == 2 {
+                let lon: f64 = parts[0].parse().ok()?;
+                let lat: f64 = parts[1].parse().ok()?;
+                return Some(Location::new(lat, lon));
+            }
+        }
+
+        None
+    }
+
+    fn contains(&self, name: &str) -> bool {
+        self.lookup(name).is_some()
+    }
+
+    fn all_names(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+#[cfg(not(feature = "geocoding"))]
+/// Gazetteer that queries Wikidata (requires `geocoding` feature).
+pub struct GazetteerWikidata;
+
+#[cfg(not(feature = "geocoding"))]
+impl Gazetteer for GazetteerWikidata {
+    fn lookup(&self, _name: &str) -> Option<Location> {
+        None
+    }
+    fn contains(&self, _name: &str) -> bool {
+        false
+    }
+    fn all_names(&self) -> Vec<&str> {
+        vec![]
+    }
+}
+
+/// Gazetteer that tries multiple sources in order.
+///
+/// Queries each gazetteer in sequence until one returns a result.
+/// Useful for combining a fast local gazetteer with slower API-based fallbacks.
+///
+/// # Example
+///
+/// ```rust,no_run
+/// use spatial_narrative::parser::{BuiltinGazetteer, MultiGazetteer, Gazetteer};
+/// # #[cfg(feature = "geocoding")]
+/// use spatial_narrative::parser::GazetteerNominatim;
+///
+/// let mut multi = MultiGazetteer::new();
+/// multi.add_source(Box::new(BuiltinGazetteer::new())); // Try built-in first
+/// # #[cfg(feature = "geocoding")]
+/// multi.add_source(Box::new(GazetteerNominatim::new())); // Then Nominatim
+///
+/// if let Some(loc) = multi.lookup("Paris") {
+///     println!("Found Paris: {}, {}", loc.lat, loc.lon);
+/// }
+/// ```
+pub struct MultiGazetteer {
+    sources: Vec<Box<dyn Gazetteer>>,
+}
+
+impl MultiGazetteer {
+    /// Create a new empty multi-gazetteer.
+    pub fn new() -> Self {
+        Self {
+            sources: Vec::new(),
+        }
+    }
+
+    /// Add a gazetteer source (will be queried in order).
+    pub fn add_source(&mut self, source: Box<dyn Gazetteer>) {
+        self.sources.push(source);
+    }
+
+    /// Create a multi-gazetteer with the given sources.
+    pub fn from_sources(sources: Vec<Box<dyn Gazetteer>>) -> Self {
+        Self { sources }
+    }
+}
+
+impl Default for MultiGazetteer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Gazetteer for MultiGazetteer {
+    fn lookup(&self, name: &str) -> Option<Location> {
+        for g in &self.sources {
+            if let Some(loc) = g.lookup(name) {
+                return Some(loc);
+            }
+        }
+        None
+    }
+    fn contains(&self, name: &str) -> bool {
+        self.sources.iter().any(|g| g.contains(name))
+    }
+    fn all_names(&self) -> Vec<&str> {
+        let mut names = Vec::new();
+        for g in &self.sources {
+            names.extend(g.all_names());
+        }
+        names
     }
 }
 
@@ -993,4 +1407,83 @@ mod tests {
         assert!((berlin.lat - 52.52).abs() < 0.01);
         assert!((berlin.lon - 13.405).abs() < 0.01);
     }
+
+    #[test]
+    fn test_multi_gazetteer() {
+        let mut multi = MultiGazetteer::new();
+        multi.add_source(Box::new(BuiltinGazetteer::new()));
+
+        // Should find in built-in
+        let paris = multi.lookup("Paris").unwrap();
+        assert!((paris.lat - 48.8566).abs() < 0.01);
+
+        // Test contains
+        assert!(multi.contains("London"));
+        assert!(!multi.contains("NonexistentPlace12345"));
+    }
+
+    #[test]
+    fn test_multi_gazetteer_fallback() {
+        let builtin = BuiltinGazetteer::new();
+        
+        let mut multi = MultiGazetteer::new();
+        multi.add_source(Box::new(builtin));
+
+        // Should try built-in first and succeed
+        assert!(multi.lookup("Tokyo").is_some());
+    }
+
+    #[cfg(feature = "geocoding")]
+    #[test]
+    #[ignore] // Ignore by default to avoid hitting real APIs in tests
+    fn test_nominatim_integration() {
+        let gaz = GazetteerNominatim::new();
+        
+        // Test lookup
+        if let Some(loc) = gaz.lookup("Berlin, Germany") {
+            assert!((loc.lat - 52.52).abs() < 1.0);
+            assert!((loc.lon - 13.4).abs() < 1.0);
+        }
+    }
+
+    #[cfg(feature = "geocoding")]
+    #[test]
+    #[ignore] // Requires GeoNames username
+    fn test_geonames_integration() {
+        // Set GEONAMES_USERNAME environment variable to run this test
+        if let Ok(username) = std::env::var("GEONAMES_USERNAME") {
+            let gaz = GazetteerGeoNames::new(username);
+            
+            if let Some(loc) = gaz.lookup("Paris") {
+                assert!((loc.lat - 48.85).abs() < 1.0);
+                assert!((loc.lon - 2.35).abs() < 1.0);
+            }
+        }
+    }
+
+    #[cfg(feature = "geocoding")]
+    #[test]
+    #[ignore] // Ignore by default to avoid hitting real APIs
+    fn test_wikidata_integration() {
+        let gaz = GazetteerWikidata::new();
+        
+        if let Some(loc) = gaz.lookup("London") {
+            assert!((loc.lat - 51.5).abs() < 1.0);
+            assert!((loc.lon + 0.1).abs() < 1.0);
+        }
+    }
+
+    #[cfg(feature = "geocoding")]
+    #[test]
+    #[ignore] // Requires network access
+    fn test_multi_with_apis() {
+        let mut multi = MultiGazetteer::new();
+        multi.add_source(Box::new(BuiltinGazetteer::new()));
+        multi.add_source(Box::new(GazetteerNominatim::new()));
+
+        // Should find in built-in first
+        let paris = multi.lookup("Paris");
+        assert!(paris.is_some());
+    }
 }
+

@@ -7,7 +7,7 @@
 //!
 //! The parser module can detect and extract:
 //! - **Coordinates**: Decimal degrees, degrees with symbols, DMS format
-//! - **Place names**: Using a configurable gazetteer for place name resolution
+//! - **Place names**: Using configurable gazetteers for place name resolution
 //!
 //! ## Key Types
 //!
@@ -17,8 +17,17 @@
 //! - [`LocationPattern`]: Configuration for what patterns to detect
 //! - [`Gazetteer`]: Trait for place name resolution
 //! - [`BuiltinGazetteer`]: Built-in gazetteer with 200+ major world locations
+//! - [`MultiGazetteer`]: Combines multiple gazetteers with fallback
 //!
-//! ## Example
+//! ### API Gazetteers (requires `geocoding` feature)
+//!
+//! - [`GazetteerNominatim`]: OpenStreetMap Nominatim API
+//! - [`GazetteerWikidata`]: Wikidata SPARQL query service
+//! - [`GazetteerGeoNames`]: GeoNames web service (requires username)
+//!
+//! ## Examples
+//!
+//! ### Basic Usage with Built-in Gazetteer
 //!
 //! ```rust
 //! use spatial_narrative::parser::{GeoParser, BuiltinGazetteer};
@@ -38,11 +47,49 @@
 //!     }
 //! }
 //! ```
+//!
+//! ### Using Multiple Gazetteers with Fallback
+//!
+//! ```rust
+//! use spatial_narrative::parser::{GeoParser, BuiltinGazetteer, MultiGazetteer};
+//!
+//! // Combine built-in with API fallbacks
+//! let mut multi = MultiGazetteer::new();
+//! multi.add_source(Box::new(BuiltinGazetteer::new()));
+//!
+//! // Built-in will be tried first, then APIs if enabled
+//! # #[cfg(feature = "geocoding")]
+//! # {
+//! use spatial_narrative::parser::GazetteerNominatim;
+//! multi.add_source(Box::new(GazetteerNominatim::new()));
+//! # }
+//!
+//! let parser = GeoParser::with_gazetteer(Box::new(multi));
+//! let mentions = parser.extract("Meeting in Seattle tomorrow");
+//! ```
+//!
+//! ### Using API Gazetteers (requires `geocoding` feature)
+//!
+//! ```rust,no_run
+//! # #[cfg(feature = "geocoding")]
+//! # {
+//! use spatial_narrative::parser::{GazetteerNominatim, Gazetteer};
+//!
+//! let gaz = GazetteerNominatim::new();
+//! if let Some(loc) = gaz.lookup("Berlin") {
+//!     println!("Berlin: {}, {}", loc.lat, loc.lon);
+//! }
+//! # }
+//! ```
 
 mod gazetteer;
 mod geoparser;
 mod mention;
 
-pub use gazetteer::{BuiltinGazetteer, Gazetteer, GazetteerEntry};
+pub use gazetteer::{BuiltinGazetteer, Gazetteer, GazetteerEntry, MultiGazetteer};
+
+#[cfg(feature = "geocoding")]
+pub use gazetteer::{GazetteerNominatim, GazetteerWikidata, GazetteerGeoNames};
+
 pub use geoparser::GeoParser;
 pub use mention::{LocationMention, LocationPattern, MentionType};
