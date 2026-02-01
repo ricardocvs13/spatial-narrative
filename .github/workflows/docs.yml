@@ -6,6 +6,7 @@ on:
     paths:
       - 'book/**'
       - 'src/**'
+      - 'docs/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
