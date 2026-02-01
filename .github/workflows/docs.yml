@@ -44,11 +44,11 @@ jobs:
 
       - name: Prepare docs directory
         run: |
-          mkdir -p docs/api docs/book
+          mkdir -p docs/api
           cp -r target/doc/* docs/api/
-          cp -r target/book/* docs/book/
-          # Ensure landing page and logo are in docs
+          # Book is already built to docs/book via book.toml build-dir
           ls -la docs/
+          ls -la docs/book/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
