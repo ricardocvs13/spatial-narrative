@@ -64,11 +64,12 @@ for mention in &mentions {
 
 ## Built-in Gazetteer
 
-The `BuiltinGazetteer` includes 200+ locations:
+The `BuiltinGazetteer` includes 2500+ world cities:
 
-- Major world capitals and cities
-- Countries with centroid coordinates
-- Common aliases (NYC → New York City, UK → United Kingdom)
+- Major world cities selected by population from [GeoNames](https://www.geonames.org)
+- Cities across 150+ countries with precise coordinates
+- Common aliases (NYC → New York City, SHA → Shanghai, etc.)
+- Data licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
 ```rust
 use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer};
