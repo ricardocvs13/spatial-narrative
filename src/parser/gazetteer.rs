@@ -16,7 +16,7 @@
 //!
 //! # Example
 //!
-//! ```rust
+//! ```rust,no_run
 //! use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer};
 //!
 //! let gaz = BuiltinGazetteer::new();

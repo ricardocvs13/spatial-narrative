@@ -14,10 +14,12 @@
 //! GEONAMES_USERNAME=your_username cargo run --example gazetteer_comparison --features geocoding
 //! ```
 
-use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer, MultiGazetteer};
+use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer};
 
 #[cfg(feature = "geocoding")]
-use spatial_narrative::parser::{GazetteerGeoNames, GazetteerNominatim, GazetteerWikidata};
+use spatial_narrative::parser::{
+    GazetteerGeoNames, GazetteerNominatim, GazetteerWikidata, MultiGazetteer,
+};
 
 fn main() {
     println!("=== Spatial Narrative Gazetteer Comparison ===\n");

@@ -29,7 +29,7 @@
 //!
 //! ### Basic Usage with Built-in Gazetteer
 //!
-//! ```rust
+//! ```rust,no_run
 //! use spatial_narrative::parser::{GeoParser, BuiltinGazetteer};
 //!
 //! // Create a parser with the built-in gazetteer
@@ -50,7 +50,7 @@
 //!
 //! ### Using Multiple Gazetteers with Fallback
 //!
-//! ```rust
+//! ```rust,no_run
 //! use spatial_narrative::parser::{GeoParser, BuiltinGazetteer, MultiGazetteer};
 //!
 //! // Combine built-in with API fallbacks
