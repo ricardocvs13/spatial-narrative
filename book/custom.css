@@ -1,99 +1,597 @@
 /* Custom styles for spatial-narrative documentation */
+/* Matches the landing page bento aesthetic */
 
-/* Header styling */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================
+   CSS Variables - Match landing page colors
+   ============================================ */
+
+:root {
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-teal: #14b8a6;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+.content,
+.sidebar {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+code, pre, .hljs {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+}
+
+/* ============================================
+   Ayu Dark Theme (Primary dark theme)
+   ============================================ */
+
+.ayu {
+    --bg: #0a0a0b;
+    --fg: #f4f4f5;
+    --sidebar-bg: #111113;
+    --sidebar-fg: #a1a1aa;
+    --sidebar-active: #3b82f6;
+    --sidebar-spacer: #2a2a2f;
+    --scrollbar: #2a2a2f;
+    --icons: #71717a;
+    --icons-hover: #f4f4f5;
+    --links: #3b82f6;
+    --inline-code-color: #f4f4f5;
+    --code-bg: #16161a;
+    --quote-bg: #16161a;
+    --quote-border: #3b82f6;
+    --table-border-color: #2a2a2f;
+    --table-header-bg: #16161a;
+    --table-alternate-bg: #111113;
+    --searchbar-border-color: #2a2a2f;
+    --searchbar-bg: #16161a;
+    --searchbar-fg: #f4f4f5;
+    --searchbar-shadow-color: transparent;
+    --searchresults-header-fg: #a1a1aa;
+    --searchresults-border-color: #2a2a2f;
+    --searchresults-li-bg: #16161a;
+    --search-mark-bg: rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================
+   Light Theme
+   ============================================ */
+
+.light {
+    --bg: #ffffff;
+    --fg: #0f172a;
+    --sidebar-bg: #f8fafc;
+    --sidebar-fg: #475569;
+    --sidebar-active: #2563eb;
+    --sidebar-spacer: #e2e8f0;
+    --scrollbar: #cbd5e1;
+    --icons: #64748b;
+    --icons-hover: #0f172a;
+    --links: #2563eb;
+    --inline-code-color: #0f172a;
+    --code-bg: #f1f5f9;
+    --quote-bg: #f8fafc;
+    --quote-border: #2563eb;
+    --table-border-color: #e2e8f0;
+    --table-header-bg: #f1f5f9;
+    --table-alternate-bg: #f8fafc;
+    --searchbar-border-color: #e2e8f0;
+    --searchbar-bg: #ffffff;
+    --searchbar-fg: #0f172a;
+    --searchbar-shadow-color: rgba(0, 0, 0, 0.1);
+    --searchresults-header-fg: #64748b;
+    --searchresults-border-color: #e2e8f0;
+    --searchresults-li-bg: #f8fafc;
+    --search-mark-bg: rgba(37, 99, 235, 0.2);
+}
+
+/* ============================================
+   Rust Theme (Enhanced)
+   ============================================ */
+
+.rust {
+    --bg: #0f0f11;
+    --fg: #f4f4f5;
+    --sidebar-bg: #16161a;
+    --sidebar-fg: #a1a1aa;
+    --sidebar-active: #f97316;
+    --sidebar-spacer: #2a2a2f;
+    --scrollbar: #2a2a2f;
+    --icons: #71717a;
+    --icons-hover: #f4f4f5;
+    --links: #f97316;
+    --inline-code-color: #f4f4f5;
+    --code-bg: #1c1c21;
+    --quote-bg: #1c1c21;
+    --quote-border: #f97316;
+    --table-border-color: #2a2a2f;
+    --table-header-bg: #1c1c21;
+    --table-alternate-bg: #16161a;
+}
+
+/* ============================================
+   Sidebar Styling
+   ============================================ */
+
+.sidebar {
+    font-size: 0.9rem;
+    padding-top: 0;
+}
+
 .sidebar .sidebar-scrollbox {
-    padding-top: 10px;
+    padding: 20px 15px;
 }
 
-/* Code block styling */
+.sidebar ol.chapter {
+    padding-left: 0;
+}
+
+.sidebar ol.chapter li.chapter-item {
+    margin: 4px 0;
+}
+
+.sidebar ol.chapter li.chapter-item a {
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: block;
+    transition: all 0.2s ease;
+    color: var(--sidebar-fg);
+}
+
+.sidebar ol.chapter li.chapter-item a:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--sidebar-active);
+}
+
+.sidebar ol.chapter li.chapter-item.active > a {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--sidebar-active);
+    font-weight: 600;
+}
+
+.sidebar .sidebar-scrollbox::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar .sidebar-scrollbox::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 3px;
+}
+
+/* ============================================
+   Content Area
+   ============================================ */
+
+.content {
+    padding: 20px 50px;
+    max-width: 900px;
+}
+
+.content main {
+    padding-bottom: 80px;
+}
+
+/* ============================================
+   Headings
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+}
+
+h1 {
+    font-size: 2.25rem;
+    padding-bottom: 0.5em;
+    border-bottom: 2px solid var(--sidebar-spacer);
+}
+
+h2 {
+    font-size: 1.75rem;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--sidebar-spacer);
+}
+
+h3 {
+    font-size: 1.35rem;
+}
+
+h4 {
+    font-size: 1.15rem;
+}
+
+h1 a.header,
+h2 a.header,
+h3 a.header,
+h4 a.header {
+    color: inherit;
+}
+
+h1 a.header:hover,
+h2 a.header:hover,
+h3 a.header:hover,
+h4 a.header:hover {
+    text-decoration: none;
+    color: var(--links);
+}
+
+/* ============================================
+   Code Blocks
+   ============================================ */
+
 pre {
-    border-radius: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--table-border-color);
+    padding: 0;
+    margin: 1.5em 0;
+    overflow: hidden;
 }
 
-/* Table styling */
+pre > code {
+    padding: 20px 24px;
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+/* Code block header look */
+pre {
+    position: relative;
+}
+
+/* Inline code */
+:not(pre) > code {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    border: 1px solid var(--table-border-color);
+}
+
+/* ============================================
+   Tables
+   ============================================ */
+
 table {
-    margin: 1em 0;
+    margin: 1.5em 0;
     border-collapse: collapse;
     width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--table-border-color);
 }
 
 th, td {
-    padding: 8px 12px;
-    border: 1px solid var(--table-border-color);
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    border-bottom: 1px solid var(--table-border-color);
 }
 
 th {
     background-color: var(--table-header-bg);
     font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sidebar-fg);
 }
 
-/* Warning/info boxes */
+tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--table-alternate-bg);
+}
+
+/* ============================================
+   Blockquotes / Admonitions
+   ============================================ */
+
+blockquote {
+    background-color: var(--quote-bg);
+    border-left: 4px solid var(--quote-border);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 1.5em 0;
+}
+
+blockquote p {
+    margin: 0;
+}
+
+/* Warning boxes */
 .warning {
-    background-color: #fff3cd;
-    border: 1px solid #ffc107;
-    border-radius: 6px;
-    padding: 1em;
-    margin: 1em 0;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-left: 4px solid var(--accent-amber);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 1.5em 0;
 }
 
-.warning code {
-    background-color: rgba(0, 0, 0, 0.1);
+.warning::before {
+    content: "⚠️ Warning";
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--accent-amber);
 }
 
-/* Dark mode warning */
-.ayu .warning,
-.navy .warning,
-.coal .warning {
-    background-color: #332701;
-    border-color: #664d00;
+/* Info boxes */
+.info {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 1.5em 0;
 }
 
-/* Feature badges */
+.info::before {
+    content: "ℹ️ Info";
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--accent-blue);
+}
+
+/* ============================================
+   Feature Badges
+   ============================================ */
+
 .badge {
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.85em;
-    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-stable {
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--accent-teal);
+}
+
+.badge-beta {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--accent-purple);
+}
+
+.badge-optional {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-amber);
 }
 
 .badge-complete {
-    background-color: #28a745;
-    color: white;
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--accent-teal);
 }
 
 .badge-planned {
-    background-color: #6c757d;
-    color: white;
+    background: rgba(113, 113, 122, 0.15);
+    color: #71717a;
 }
 
-/* Status emoji styling */
-.status-complete::before {
-    content: "✅ ";
+/* ============================================
+   Navigation Controls
+   ============================================ */
+
+.nav-chapters {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
-.status-planned::before {
-    content: "🚧 ";
+.nav-chapters:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--links);
 }
 
-/* Improve heading anchors */
-h1 a.header,
-h2 a.header,
-h3 a.header {
-    color: inherit;
+/* Page navigation buttons */
+.nav-wrapper {
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid var(--sidebar-spacer);
 }
 
-/* Better inline code */
-:not(pre) > code {
-    padding: 2px 6px;
+a.nav-chapters {
+    background: var(--code-bg);
+    border: 1px solid var(--table-border-color);
+}
+
+a.nav-chapters:hover {
+    border-color: var(--links);
+}
+
+/* ============================================
+   Search
+   ============================================ */
+
+#searchbar {
+    border-radius: 10px;
+    border: 1px solid var(--searchbar-border-color);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+#searchbar:focus {
+    border-color: var(--links);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    outline: none;
+}
+
+.searchresults {
+    border-radius: 12px;
+    border: 1px solid var(--searchresults-border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.searchresults li {
+    border-bottom: 1px solid var(--searchresults-border-color);
+    padding: 12px 16px;
+}
+
+.searchresults li:last-child {
+    border-bottom: none;
+}
+
+/* ============================================
+   Menu Bar
+   ============================================ */
+
+#menu-bar {
+    border-bottom: 1px solid var(--sidebar-spacer);
+    background: var(--bg);
+}
+
+#menu-bar i {
+    transition: color 0.2s ease;
+}
+
+#menu-bar i:hover {
+    color: var(--links);
+}
+
+/* Theme popup */
+#theme-list {
+    border-radius: 10px;
+    border: 1px solid var(--table-border-color);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+#theme-list li {
+    padding: 10px 16px;
+    transition: background 0.2s ease;
+}
+
+#theme-list li:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================
+   Links
+   ============================================ */
+
+a {
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   Lists
+   ============================================ */
+
+ul, ol {
+    padding-left: 1.5em;
+    margin: 1em 0;
+}
+
+li {
+    margin: 0.5em 0;
+    line-height: 1.7;
+}
+
+/* ============================================
+   Module Structure Diagram
+   ============================================ */
+
+.module-diagram {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: var(--code-bg);
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--table-border-color);
+    overflow-x: auto;
+    line-height: 1.6;
+}
+
+/* ============================================
+   Scrollbars
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
     border-radius: 4px;
 }
 
-/* Module structure diagram */
-.module-diagram {
-    font-family: monospace;
-    background-color: var(--code-bg);
-    padding: 1em;
-    border-radius: 6px;
-    overflow-x: auto;
+::-webkit-scrollbar-thumb:hover {
+    background: var(--icons);
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .sidebar,
+    #menu-bar,
+    .nav-wrapper {
+        display: none;
+    }
+
+    .content {
+        max-width: 100%;
+        padding: 0;
+    }
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 768px) {
+    .content {
+        padding: 15px 20px;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    pre > code {
+        padding: 16px;
+        font-size: 0.85rem;
+    }
+
+    table {
+        font-size: 0.85rem;
+    }
+
+    th, td {
+        padding: 8px 12px;
+    }
 }

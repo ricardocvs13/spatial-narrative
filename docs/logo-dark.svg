@@ -1,0 +1,31 @@
+<svg viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f97316;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+
+    <!-- Text Group -->
+    <text x="40" y="115" font-family="'Segoe UI', sans-serif" font-weight="800" font-size="64" fill="#f4f4f5" letter-spacing="-1.5">spatial</text>
+    <text x="270" y="85" font-family="'Segoe UI', sans-serif" font-weight="300" font-size="64" fill="#f97316" letter-spacing="-1">narrative</text>
+
+    <!-- Step-Up Path -->
+    <path id="pathStepUp"
+          d="M45,135
+             L230,135
+             C250,135 250,105 270,105
+             L540,105"
+          fill="none" stroke="url(#primaryGrad)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <circle cx="45" cy="135" r="5" fill="#60a5fa"/>
+    <circle cx="540" cy="105" r="5" fill="#f97316"/>
+
+    <!-- Animated Dot -->
+    <circle r="5" fill="#0a0a0b" stroke="#f97316" stroke-width="2">
+        <animateMotion dur="4s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 0.2 1">
+            <mpath href="#pathStepUp"/>
+        </animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="4s" repeatCount="indefinite" />
+    </circle>
+</svg>
