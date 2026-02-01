@@ -1,0 +1,12 @@
+/* Minimal mdBook custom.css
+   Restores the file referenced in book.toml to prevent build failures in CI.
+   This file is intentionally minimal to avoid altering the documented theme.
+*/
+
+/* Ensure links are readable */
+a { color: #1e3a8a; }
+
+/* Small adjustments that are safe across themes */
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* Keep the file available for future customizations */
