@@ -17,14 +17,14 @@
 use spatial_narrative::parser::{BuiltinGazetteer, Gazetteer, MultiGazetteer};
 
 #[cfg(feature = "geocoding")]
-use spatial_narrative::parser::{GazetteerNominatim, GazetteerWikidata, GazetteerGeoNames};
+use spatial_narrative::parser::{GazetteerGeoNames, GazetteerNominatim, GazetteerWikidata};
 
 fn main() {
     println!("=== Spatial Narrative Gazetteer Comparison ===\n");
 
     let test_places = vec![
         "London",
-        "Paris", 
+        "Paris",
         "Tokyo",
         "New York City",
         "Berlin",
@@ -42,7 +42,7 @@ fn main() {
         println!("\n--- Nominatim (OpenStreetMap) ---");
         println!("Note: Querying public API (please respect rate limits)\n");
         let nominatim = GazetteerNominatim::new();
-        
+
         // Only test first place to avoid hitting rate limits
         if let Some(loc) = nominatim.lookup(test_places[0]) {
             println!("✓ {}: ({:.4}, {:.4})", test_places[0], loc.lat, loc.lon);
@@ -52,7 +52,7 @@ fn main() {
         println!("\n--- Wikidata ---");
         println!("Note: Querying Wikidata SPARQL endpoint\n");
         let wikidata = GazetteerWikidata::new();
-        
+
         if let Some(loc) = wikidata.lookup(test_places[1]) {
             println!("✓ {}: ({:.4}, {:.4})", test_places[1], loc.lat, loc.lon);
         }
@@ -61,7 +61,7 @@ fn main() {
         if let Ok(username) = std::env::var("GEONAMES_USERNAME") {
             println!("\n--- GeoNames ---");
             let geonames = GazetteerGeoNames::new(username);
-            
+
             if let Some(loc) = geonames.lookup(test_places[2]) {
                 println!("✓ {}: ({:.4}, {:.4})", test_places[2], loc.lat, loc.lon);
             }
@@ -77,7 +77,7 @@ fn main() {
         multi.add_source(Box::new(GazetteerNominatim::new()));
 
         println!("Strategy: Try built-in first, fall back to Nominatim if not found\n");
-        
+
         // Test with a place in built-in (should use built-in)
         if let Some(loc) = multi.lookup("Paris") {
             println!("✓ Paris: ({:.4}, {:.4}) [from built-in]", loc.lat, loc.lon);
@@ -86,7 +86,10 @@ fn main() {
         // Test with a place not in built-in (should fall back to Nominatim)
         println!("\nNote: Next lookup will query Nominatim API...");
         if let Some(loc) = multi.lookup("Seattle") {
-            println!("✓ Seattle: ({:.4}, {:.4}) [from Nominatim fallback]", loc.lat, loc.lon);
+            println!(
+                "✓ Seattle: ({:.4}, {:.4}) [from Nominatim fallback]",
+                loc.lat, loc.lon
+            );
         }
     }
 

@@ -21,9 +21,9 @@
 //!
 //! ### API Gazetteers (requires `geocoding` feature)
 //!
-//! - [`GazetteerNominatim`]: OpenStreetMap Nominatim API
-//! - [`GazetteerWikidata`]: Wikidata SPARQL query service
-//! - [`GazetteerGeoNames`]: GeoNames web service (requires username)
+//! - `GazetteerNominatim`: OpenStreetMap Nominatim API
+//! - `GazetteerWikidata`: Wikidata SPARQL query service
+//! - `GazetteerGeoNames`: GeoNames web service (requires username)
 //!
 //! ## Examples
 //!
@@ -89,7 +89,7 @@ mod mention;
 pub use gazetteer::{BuiltinGazetteer, Gazetteer, GazetteerEntry, MultiGazetteer};
 
 #[cfg(feature = "geocoding")]
-pub use gazetteer::{GazetteerNominatim, GazetteerWikidata, GazetteerGeoNames};
+pub use gazetteer::{GazetteerGeoNames, GazetteerNominatim, GazetteerWikidata};
 
 pub use geoparser::GeoParser;
 pub use mention::{LocationMention, LocationPattern, MentionType};
